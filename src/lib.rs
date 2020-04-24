@@ -1,6 +1,41 @@
 
 pub mod algorithms {
     pub mod a_star {
+        pub struct Field {
+            pub left_field: Option<Box<Field>>,
+            pub right_field: Option<Box<Field>>,
+            pub up_field: Option<Box<Field>>,
+            pub down_field: Option<Box<Field>>,
+            pub value: i8
+
+        }
+
+        impl Field {
+            fn is_exploreable(&self) -> bool {
+                if self.value == -1 {
+                    return true;
+                }
+
+                return false;
+            }
+
+            fn is_start(&self) -> bool {
+                if self.value == 1 {
+                    return true;
+                }
+
+                return false;
+            }
+
+            fn is_target(&self) -> bool {
+                if self.value == 2 {
+                    return true;
+                }
+
+                return false;
+            }
+
+        }
 
         fn bord_is_well_form(matrix_bord: &[Vec<i8>]) -> Option<&'static str> {
             let matrix_ligne_number = matrix_bord.len();
@@ -81,6 +116,24 @@ pub mod algorithms {
             let y: i8 = start_to_end_index[0][1] as i8 - start_to_end_index[1][1] as i8;
 
             return (x.abs() + y.abs()) as u8;
+        }
+
+        pub fn matrix_into_graph(matrix_bord: Vec<Vec<i8>>, x: i8, y: i8) -> Option<Box<Field>> {
+            let matrix_bord_length: i8 = matrix_bord.len() as i8;
+
+            if matrix_bord_length < x || matrix_bord_length < y || x < 0 || y < 0 {
+                return None;
+            }
+
+            return Some(Box::new(Field{
+                left_field: matrix_into_graph(matrix_bord.clone(), x, y + 1),
+                right_field: matrix_into_graph(matrix_bord.clone(), x, y - 1),
+                up_field: matrix_into_graph(matrix_bord.clone(), x - 1, y),
+                down_field: matrix_into_graph(matrix_bord.clone(), x + 1, y),
+                value: *matrix_bord.get(0).unwrap().get(0).unwrap()
+
+            }));
+            
         }
 
         #[cfg(test)]
@@ -176,6 +229,22 @@ pub mod algorithms {
                     vec![0; 5]
                 ];
                 get_start_to_end_points(data_sample).unwrap();
+            }
+
+            #[test]
+            fn matrix_into_graph_test() {
+                let data_sample = vec![vec![0, 0, 2], vec![0, 0, 0], vec![1, 0, 0]];
+                // let data_sample_result = Field {
+                //     left_field: None,
+                //     right_field: Field {
+                        
+                //     },
+                //     up_field: None,
+                //     down_field: ,
+                //     value: 0 
+                // };
+                let result = matrix_into_graph(data_sample, 0, 0);
+
             }
         }
     }
