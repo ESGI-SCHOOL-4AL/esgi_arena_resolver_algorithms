@@ -1,6 +1,8 @@
 
 pub mod algorithms {
     pub mod a_star {
+
+        #[derive(Debug, Clone)]
         pub struct Field {
             pub left_field: Option<Box<Field>>,
             pub right_field: Option<Box<Field>>,
@@ -118,21 +120,43 @@ pub mod algorithms {
             return (x.abs() + y.abs()) as u8;
         }
 
-        pub fn matrix_into_graph(matrix_bord: Vec<Vec<i8>>, x: i8, y: i8) -> Option<Box<Field>> {
-            let matrix_bord_length: i8 = matrix_bord.len() as i8;
+        pub fn matrix_into_graph(matrix_bord: Vec<Vec<i8>>) -> Option<Box<Field>> {
+            let matrix_bord_length: u8 = matrix_bord.len() as u8;
+            let mut matrix_fields: Vec<Vec<Box<Field>>> = Vec::new();
+            let mut starter_point_graph: Option<Box<Field>> = None; 
 
-            if matrix_bord_length < x || matrix_bord_length < y || x < 0 || y < 0 {
+            if matrix_bord.is_empty() {
                 return None;
             }
 
-            return Some(Box::new(Field{
-                left_field: matrix_into_graph(matrix_bord.clone(), x, y + 1),
-                right_field: matrix_into_graph(matrix_bord.clone(), x, y - 1),
-                up_field: matrix_into_graph(matrix_bord.clone(), x - 1, y),
-                down_field: matrix_into_graph(matrix_bord.clone(), x + 1, y),
-                value: *matrix_bord.get(0).unwrap().get(0).unwrap()
+            for x in 0..matrix_bord_length {
+                let mut field_line: Vec<Box<Field>> = Vec::new();
 
-            }));
+                for y in 0..matrix_bord_length {
+                    field_line.push(Box::new(Field {
+                        left_field: if y as i8 - 1 < 0  { None } else { field_line.get((y - 1) as usize).cloned() },
+                        right_field: if y + 1 > matrix_bord_length { None } else { field_line.get((y + 1) as usize).cloned() },
+                        up_field: if x as i8 - 1 < 0 { None } else { 
+                            matrix_fields.get((x - 1) as usize).unwrap()
+                                .get(y as usize).cloned() 
+                        },
+                        down_field: if x + 1 > matrix_bord_length { None } else {
+                            matrix_fields.get((x + 1) as usize).unwrap()
+                                .get(y as usize).cloned()
+                        },
+                        value: *matrix_bord.get(x as usize).unwrap().get(y as usize).unwrap()
+                    }));
+
+                    if field_line.last().unwrap().is_start() {
+                        starter_point_graph = field_line.last().cloned();
+                    }
+                }
+
+
+                matrix_fields.push(field_line);
+            }
+
+            return starter_point_graph;
             
         }
 
@@ -234,17 +258,15 @@ pub mod algorithms {
             #[test]
             fn matrix_into_graph_test() {
                 let data_sample = vec![vec![0, 0, 2], vec![0, 0, 0], vec![1, 0, 0]];
-                // let data_sample_result = Field {
-                //     left_field: None,
-                //     right_field: Field {
-                        
-                //     },
-                //     up_field: None,
-                //     down_field: ,
-                //     value: 0 
-                // };
-                let result = matrix_into_graph(data_sample, 0, 0);
+                let collected: Vec<u8> = data_sample.iter()
+                    .enumerate()
+                    .flat_map(|data| data.1.iter())
+                    .cloned()
+                    .inspect(|data| println!("Data: {}", data))
+                    .collect();
 
+                // matrix_into_graph(data_sample);
+                assert_eq!(0, 4);
             }
         }
     }
