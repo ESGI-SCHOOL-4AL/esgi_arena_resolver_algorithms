@@ -2,41 +2,35 @@
 pub mod algorithms {
     pub mod a_star {
 
-        #[derive(Debug, Clone)]
+        #[derive(Debug, Clone, Copy, PartialEq)]
+        pub struct Point {
+            pub x: Option<u8>,
+            pub y: Option<u8>
+        }
+
+        impl Point {
+            fn new() -> Self {
+                return Self {
+                    x: None,
+                    y: None
+                };
+            }
+        }
+
+        #[derive(Debug, Clone, Copy)]
         pub struct Field {
-            pub left_field: Option<Box<Field>>,
-            pub right_field: Option<Box<Field>>,
-            pub up_field: Option<Box<Field>>,
-            pub down_field: Option<Box<Field>>,
-            pub value: i8
+            pub coordinates: Point,
+            pub heuristic: Option<u8>
 
         }
 
         impl Field {
-            fn is_exploreable(&self) -> bool {
-                if self.value == -1 {
-                    return true;
-                }
-
-                return false;
+            fn new() -> Self {
+                return Self {
+                    coordinates: Point::new(),
+                    heuristic: None
+                };
             }
-
-            fn is_start(&self) -> bool {
-                if self.value == 1 {
-                    return true;
-                }
-
-                return false;
-            }
-
-            fn is_target(&self) -> bool {
-                if self.value == 2 {
-                    return true;
-                }
-
-                return false;
-            }
-
         }
 
         fn bord_is_well_form(matrix_bord: &[Vec<i8>]) -> Option<&'static str> {
@@ -57,9 +51,9 @@ pub mod algorithms {
             return None;
         }
 
-        fn get_start_to_end_points(matrix_bord: Vec<Vec<i8>>) -> Result<[[u8; 2]; 2], &'static str> {
+        fn get_start_to_end_points(matrix_bord: Vec<Vec<i8>>) -> Result<(Point, Point), &'static str> {
             let matrix_ligne_number = matrix_bord.len();
-            let mut result_points: [[u8; 2]; 2] = [[0; 2], [0; 2]];
+            let mut result_points: (Point, Point) = (Point::new(), Point::new());
 
             let message_option = bord_is_well_form(matrix_bord.as_slice());
 
@@ -74,22 +68,22 @@ pub mod algorithms {
 
                 for (y, point_value) in matrix_line.iter().enumerate() {
                     match point_value {
-                        1 => if result_points[0] != [0; 2] { 
+                        1 => if result_points.0 != Point::new() { 
                                 return Err("Cannot have many start points"); 
                             } else {
-                                result_points[0] = [i as u8, y as u8];
+                                result_points.0 = Point { x: Some(i as u8), y: Some(y as u8) };
                             },
-                        2 => if result_points[1] != [0; 2] { 
+                        2 => if result_points.1 != Point::new() { 
                                 return Err("Cannot have many end points"); 
                             } else {
-                                result_points[1] = [i as u8, y as u8];
+                                result_points.1 = Point { x: Some(i as u8), y: Some(y as u8) };
                             },
                         _ => continue
                     }
                 }
             }
 
-            if matrix_bord[0] == [0; 2] || matrix_bord[1] == [0; 2] {
+            if result_points.0 == Point::new() || result_points.1 == Point::new() {
                 return Err("A start point and a end point are required");
             }
 
@@ -102,63 +96,29 @@ pub mod algorithms {
         /// # Exemple
         /// 
         /// ```
+        /// use esgi_arena_resolver_algorithms::algorithms::a_star::Point;
         /// use esgi_arena_resolver_algorithms::algorithms::a_star::get_manhattan_distance_heuristic;
         /// 
-        /// let mut data_to_send: [[u8; 2]; 2] = [[0; 2]; 2]; 
-        /// let current_point: [u8; 2] = [0, 0];
-        /// let target_point: [u8; 2] = [2, 5];
+        /// let start = Point {
+        ///     x: Some(0),
+        ///     y: Some(0)
+        /// };
+        /// let end = Point {
+        ///     x: Some(2),
+        ///     y: Some(5)
+        /// };
         /// 
-        /// data_to_send[0] = current_point;
-        /// data_to_send[1] = target_point;
-        /// 
-        /// assert_eq!(get_manhattan_distance_heuristic(data_to_send), 7);
+        /// assert_eq!(get_manhattan_distance_heuristic(start, end), 7);
         /// ```
-        pub fn get_manhattan_distance_heuristic(start_to_end_index: [[u8; 2]; 2]) -> u8 {
-            let x: i8 = start_to_end_index[0][0] as i8 - start_to_end_index[1][0] as i8;
-            let y: i8 = start_to_end_index[0][1] as i8 - start_to_end_index[1][1] as i8;
+        pub fn get_manhattan_distance_heuristic(start_coordinates: Point, end_coordinates: Point) -> u8 {
+            let x: i8 = start_coordinates.x.unwrap() as i8 - end_coordinates.x.unwrap() as i8;
+            let y: i8 = start_coordinates.y.unwrap() as i8 - end_coordinates.y.unwrap() as i8;
 
             return (x.abs() + y.abs()) as u8;
         }
 
-        pub fn matrix_into_graph(matrix_bord: Vec<Vec<i8>>) -> Option<Box<Field>> {
-            let matrix_bord_length: u8 = matrix_bord.len() as u8;
-            let mut matrix_fields: Vec<Vec<Box<Field>>> = Vec::new();
-            let mut starter_point_graph: Option<Box<Field>> = None; 
+        // Need a list of position to check
 
-            if matrix_bord.is_empty() {
-                return None;
-            }
-
-            for x in 0..matrix_bord_length {
-                let mut field_line: Vec<Box<Field>> = Vec::new();
-
-                for y in 0..matrix_bord_length {
-                    field_line.push(Box::new(Field {
-                        left_field: if y as i8 - 1 < 0  { None } else { field_line.get((y - 1) as usize).cloned() },
-                        right_field: if y + 1 > matrix_bord_length { None } else { field_line.get((y + 1) as usize).cloned() },
-                        up_field: if x as i8 - 1 < 0 { None } else { 
-                            matrix_fields.get((x - 1) as usize).unwrap()
-                                .get(y as usize).cloned() 
-                        },
-                        down_field: if x + 1 > matrix_bord_length { None } else {
-                            matrix_fields.get((x + 1) as usize).unwrap()
-                                .get(y as usize).cloned()
-                        },
-                        value: *matrix_bord.get(x as usize).unwrap().get(y as usize).unwrap()
-                    }));
-
-                    if field_line.last().unwrap().is_start() {
-                        starter_point_graph = field_line.last().cloned();
-                    }
-                }
-
-
-                matrix_fields.push(field_line);
-            }
-
-            return starter_point_graph;
-            
-        }
 
         #[cfg(test)]
         mod tests {
@@ -205,7 +165,7 @@ pub mod algorithms {
                     vec![0; 5],
                     vec![0; 5]
                 ];
-                assert_eq!(get_start_to_end_points(data_sample).unwrap(), [[1, 1], [2, 2]]);
+                assert_eq!(get_start_to_end_points(data_sample).unwrap(), (Point { x: Some(1), y: Some(1) }, Point { x: Some(2), y: Some(2) }));
             }
 
             #[test]
@@ -253,20 +213,6 @@ pub mod algorithms {
                     vec![0; 5]
                 ];
                 get_start_to_end_points(data_sample).unwrap();
-            }
-
-            #[test]
-            fn matrix_into_graph_test() {
-                let data_sample = vec![vec![0, 0, 2], vec![0, 0, 0], vec![1, 0, 0]];
-                let collected: Vec<u8> = data_sample.iter()
-                    .enumerate()
-                    .flat_map(|data| data.1.iter())
-                    .cloned()
-                    .inspect(|data| println!("Data: {}", data))
-                    .collect();
-
-                // matrix_into_graph(data_sample);
-                assert_eq!(0, 4);
             }
         }
     }
