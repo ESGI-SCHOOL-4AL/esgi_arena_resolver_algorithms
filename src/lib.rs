@@ -91,7 +91,8 @@ pub mod algorithms {
             return Ok(result_points);
         }
 
-        /// Get heuristic value from start point too the target
+        /// Get heuristic value from start point to the target.
+        /// 
         /// [For more explanations](https://xlinux.nist.gov/dads//HTML/manhattanDistance.html)
         /// 
         /// # Example
@@ -118,9 +119,11 @@ pub mod algorithms {
             return (x.abs() + y.abs()) as u8;
         }
 
-        /// Get a FS APS graph from bord matrix
-        /// The FS vector contain all sons of each element
-        /// The APS contain the range of FS index for each element
+        /// Get a FS APS graph from bord matrix.
+        /// 
+        /// The FS vector contain all sons of each element.
+        /// 
+        /// The APS contain the range of FS index for each element.
         /// 
         /// # Example
         /// 
