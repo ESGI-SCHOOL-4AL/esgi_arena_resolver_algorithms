@@ -1,6 +1,23 @@
 
 pub mod algorithms {
     pub mod a_star {
+        #[derive(Debug, Clone, Copy, PartialEq)]
+        pub struct Field {
+            pub coordinates: Point,
+            pub value: Option<i8>,
+            pub heuristic: Option<u8>
+
+        }
+
+        impl Field {
+            fn new() -> Self {
+                return Self {
+                    coordinates: Point::new(),
+                    value: None,
+                    heuristic: None
+                };
+            }
+        }
 
         #[derive(Debug, Clone, Copy, PartialEq)]
         pub struct Point {
@@ -13,22 +30,6 @@ pub mod algorithms {
                 return Self {
                     x: None,
                     y: None
-                };
-            }
-        }
-
-        #[derive(Debug, Clone, Copy)]
-        pub struct Field {
-            pub coordinates: Point,
-            pub heuristic: Option<u8>
-
-        }
-
-        impl Field {
-            fn new() -> Self {
-                return Self {
-                    coordinates: Point::new(),
-                    heuristic: None
                 };
             }
         }
@@ -93,7 +94,7 @@ pub mod algorithms {
         /// Get heuristic value from start point too the target
         /// [For more explanations](https://xlinux.nist.gov/dads//HTML/manhattanDistance.html)
         /// 
-        /// # Exemple
+        /// # Example
         /// 
         /// ```
         /// use esgi_arena_resolver_algorithms::algorithms::a_star::Point;
@@ -117,7 +118,159 @@ pub mod algorithms {
             return (x.abs() + y.abs()) as u8;
         }
 
-        // Need a list of position to check
+        /// Get a FS APS graph from bord matrix
+        /// The FS vector contain all sons of each element
+        /// The APS contain the range of FS index for each element
+        /// 
+        /// # Example
+        /// 
+        /// ```
+        /// use esgi_arena_resolver_algorithms::algorithms::a_star::Point;
+        /// use esgi_arena_resolver_algorithms::algorithms::a_star::Field;
+        /// use esgi_arena_resolver_algorithms::algorithms::a_star::fs_aps_from_matrix;
+        ///
+        /// let data_sample: Vec<Vec<i8>> = vec![
+        ///     vec![0, 1], 
+        ///     vec![0, 2]
+        /// ];
+        /// let expect_fs = vec![
+        ///     Field {
+        ///         coordinates: Point {
+        ///             x: Some(0),
+        ///             y: Some(1)
+        ///         },
+        ///         heuristic: None,
+        ///         value: Some(1)
+        ///      },
+        ///      Field {
+        ///         coordinates: Point {
+        ///             x: Some(1),
+        ///             y: Some(0)
+        ///         },
+        ///         heuristic: None,
+        ///         value: Some(0)
+        ///      },
+        ///      Field {
+        ///         coordinates: Point {
+        ///             x: Some(0),
+        ///             y: Some(0)
+        ///         },
+        ///         heuristic: None,
+        ///         value: Some(0)
+        ///      },
+        ///      Field {
+        ///         coordinates: Point {
+        ///             x: Some(1),
+        ///             y: Some(1)
+        ///         },
+        ///         heuristic: None,
+        ///         value: Some(2)
+        ///      },
+        ///      Field {
+        ///         coordinates: Point {
+        ///             x: Some(1),
+        ///             y: Some(1)
+        ///         },
+        ///         heuristic: None,
+        ///         value: Some(2)
+        ///      },
+        ///      Field {
+        ///         coordinates: Point {
+        ///             x: Some(0),
+        ///             y: Some(0)
+        ///         },
+        ///         heuristic: None,
+        ///         value: Some(0)
+        ///      },
+        ///      Field {
+        ///         coordinates: Point {
+        ///             x: Some(1),
+        ///             y: Some(0)
+        ///         },
+        ///         heuristic: None,
+        ///         value: Some(0)
+        ///      },
+        ///      Field {
+        ///         coordinates: Point {
+        ///             x: Some(0),
+        ///             y: Some(1)
+        ///         },
+        ///         heuristic: None,
+        ///         value: Some(1)
+        ///      } 
+        /// ];
+        /// let expect_aps = vec![0, 2, 4, 6, 8];
+        /// assert_eq!(fs_aps_from_matrix(data_sample).unwrap(), (expect_fs, expect_aps));
+        /// ```
+        pub fn fs_aps_from_matrix(matrix: Vec<Vec<i8>>) -> Result<(Vec<Field>, Vec<u8>), &'static str> {
+            let message_option = bord_is_well_form(matrix.as_slice());
+
+            if message_option.is_some() {
+                return Err(message_option.unwrap());
+            }
+
+            let mut fs: Vec<Field> = Vec::new();
+            let mut aps: Vec<u8> = vec![0];
+
+            for line_index in 0..matrix.len() {
+                for index in 0..matrix.len() {
+                    let current_element = *matrix.get(line_index).unwrap().get(index).unwrap();
+                    let mut current_aps_index: u8 = 0;
+
+                    if index as i8 - 1 >= 0 {
+                        fs.push(Field {
+                            coordinates: Point {
+                                x: Some(line_index as u8),
+                                y: Some(index as u8 - 1)
+                            },
+                            heuristic: None,
+                            value: matrix.get(line_index).unwrap().get(index - 1).cloned()
+                         });
+                         current_aps_index += 1;
+                    }
+
+                    if index as i8 + 1 < matrix.len() as i8 {
+                        fs.push(Field {
+                            coordinates: Point {
+                                x: Some(line_index as u8),
+                                y: Some(index as u8 + 1)
+                            },
+                            heuristic: None,
+                            value: matrix.get(line_index).unwrap().get(index + 1).cloned()
+                         });
+                         current_aps_index += 1;
+                    }
+
+                    if line_index as i8 - 1 >= 0 {
+                        fs.push(Field {
+                            coordinates: Point {
+                                x: Some(line_index as u8 - 1),
+                                y: Some(index as u8)
+                            },
+                            heuristic: None,
+                            value: matrix.get(line_index - 1).unwrap().get(index).cloned()
+                         });
+                         current_aps_index += 1;
+                    }
+
+                    if line_index as i8 + 1 < matrix.len() as i8 {
+                        fs.push(Field {
+                            coordinates: Point {
+                                x: Some(line_index as u8 + 1),
+                                y: Some(index as u8)
+                            },
+                            heuristic: None,
+                            value: matrix.get(line_index + 1).unwrap().get(index).cloned()
+                         });
+                         current_aps_index += 1;
+                    }
+
+                    aps.push(aps.last().unwrap() + current_aps_index);
+                }
+            }
+
+            return Ok((fs, aps));
+        }
 
 
         #[cfg(test)]
