@@ -1,11 +1,10 @@
-
 pub mod algorithms {
     pub mod a_star {
         #[derive(Debug, Clone, Copy, PartialEq)]
         pub struct Field {
             pub coordinates: Point,
             pub value: Option<i8>,
-            pub heuristic: Option<u8>
+            pub move_cost: Option<u8>
 
         }
 
@@ -14,7 +13,7 @@ pub mod algorithms {
                 return Self {
                     coordinates: Point::new(),
                     value: None,
-                    heuristic: None
+                    move_cost: None
                 };
             }
         }
@@ -142,7 +141,7 @@ pub mod algorithms {
         ///             x: Some(0),
         ///             y: Some(1)
         ///         },
-        ///         heuristic: None,
+        ///         move_cost: None,
         ///         value: Some(1)
         ///      },
         ///      Field {
@@ -150,7 +149,7 @@ pub mod algorithms {
         ///             x: Some(1),
         ///             y: Some(0)
         ///         },
-        ///         heuristic: None,
+        ///         move_cost: None,
         ///         value: Some(0)
         ///      },
         ///      Field {
@@ -158,7 +157,7 @@ pub mod algorithms {
         ///             x: Some(0),
         ///             y: Some(0)
         ///         },
-        ///         heuristic: None,
+        ///         move_cost: None,
         ///         value: Some(0)
         ///      },
         ///      Field {
@@ -166,7 +165,7 @@ pub mod algorithms {
         ///             x: Some(1),
         ///             y: Some(1)
         ///         },
-        ///         heuristic: None,
+        ///         move_cost: None,
         ///         value: Some(2)
         ///      },
         ///      Field {
@@ -174,7 +173,7 @@ pub mod algorithms {
         ///             x: Some(1),
         ///             y: Some(1)
         ///         },
-        ///         heuristic: None,
+        ///         move_cost: None,
         ///         value: Some(2)
         ///      },
         ///      Field {
@@ -182,7 +181,7 @@ pub mod algorithms {
         ///             x: Some(0),
         ///             y: Some(0)
         ///         },
-        ///         heuristic: None,
+        ///         move_cost: None,
         ///         value: Some(0)
         ///      },
         ///      Field {
@@ -190,7 +189,7 @@ pub mod algorithms {
         ///             x: Some(1),
         ///             y: Some(0)
         ///         },
-        ///         heuristic: None,
+        ///         move_cost: None,
         ///         value: Some(0)
         ///      },
         ///      Field {
@@ -198,7 +197,7 @@ pub mod algorithms {
         ///             x: Some(0),
         ///             y: Some(1)
         ///         },
-        ///         heuristic: None,
+        ///         move_cost: None,
         ///         value: Some(1)
         ///      } 
         /// ];
@@ -217,7 +216,6 @@ pub mod algorithms {
 
             for line_index in 0..matrix.len() {
                 for index in 0..matrix.len() {
-                    let current_element = *matrix.get(line_index).unwrap().get(index).unwrap();
                     let mut current_aps_index: u8 = 0;
 
                     if index as i8 - 1 >= 0 {
@@ -226,7 +224,7 @@ pub mod algorithms {
                                 x: Some(line_index as u8),
                                 y: Some(index as u8 - 1)
                             },
-                            heuristic: None,
+                            move_cost: None,
                             value: matrix.get(line_index).unwrap().get(index - 1).cloned()
                          });
                          current_aps_index += 1;
@@ -238,7 +236,7 @@ pub mod algorithms {
                                 x: Some(line_index as u8),
                                 y: Some(index as u8 + 1)
                             },
-                            heuristic: None,
+                            move_cost: None,
                             value: matrix.get(line_index).unwrap().get(index + 1).cloned()
                          });
                          current_aps_index += 1;
@@ -250,7 +248,7 @@ pub mod algorithms {
                                 x: Some(line_index as u8 - 1),
                                 y: Some(index as u8)
                             },
-                            heuristic: None,
+                            move_cost: None,
                             value: matrix.get(line_index - 1).unwrap().get(index).cloned()
                          });
                          current_aps_index += 1;
@@ -262,7 +260,7 @@ pub mod algorithms {
                                 x: Some(line_index as u8 + 1),
                                 y: Some(index as u8)
                             },
-                            heuristic: None,
+                            move_cost: None,
                             value: matrix.get(line_index + 1).unwrap().get(index).cloned()
                          });
                          current_aps_index += 1;
@@ -275,6 +273,21 @@ pub mod algorithms {
             return Ok((fs, aps));
         }
 
+        pub fn get_element_childs_from_fs_aps(fs: Vec<Field>, aps: Vec<u8>, index: usize) -> Result<Vec<Field>, &'static str> {
+            if index >= aps.len() {
+                return Err("The index cannot be bigger than the size of APS vector");
+            }
+
+            let fs_start_index = aps.get(index).unwrap().clone() as usize;
+            let fs_end_index = (fs_start_index + 1) as usize;
+
+            return Ok(fs.iter()
+                .enumerate()
+                .filter(|(index, _)| index >= &fs_start_index && index <= &fs_end_index)
+                .map(|(_, element)| element.clone())
+                .collect());
+
+        }
 
         #[cfg(test)]
         mod tests {
