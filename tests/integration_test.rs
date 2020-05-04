@@ -122,7 +122,7 @@ mod tests {
     }
 
     #[test]
-    fn get_field_from_matrix_test() {
+    fn get_field_by_index_test() {
         let (matrix, _, _) = testing_data();
         let index_field = Point {
             x: Some(1),
@@ -134,7 +134,7 @@ mod tests {
             value: Some(2)
         };
 
-        assert_eq!(get_field_from_matrix(matrix, index_field).unwrap(), result_field);
+        assert_eq!(get_field_by_index(matrix, index_field).unwrap(), result_field);
     }
 
 }

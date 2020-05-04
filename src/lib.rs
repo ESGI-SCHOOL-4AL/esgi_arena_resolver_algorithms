@@ -273,7 +273,7 @@ pub mod algorithms {
             return Ok((fs, aps));
         }
 
-        pub fn get_field_from_matrix(matrix_bord: Vec<Vec<i8>>, index: Point) -> Result<Field, &'static str> {
+        pub fn get_field_by_index(matrix_bord: Vec<Vec<i8>>, index: Point) -> Result<Field, &'static str> {
             let matrix_ligne_number = matrix_bord.len();
 
             let message_option = bord_is_well_form(matrix_bord.as_slice());
@@ -329,12 +329,12 @@ pub mod algorithms {
         }
 
         pub fn a_star_resolver(fs: Vec<Field>, aps: Vec<u8>, start_point: Point) -> Result<Vec<Point>, &'static str> {
-            let mut open_list: Vec<Field> = Vec::new();
-            let mut close_list: Vec<Field> = Vec::new();
-
             if fs == Vec::new() || aps == Vec::new() || start_point == Point::new() {
                 return Err("The parameters MUST be initializes");
             }
+
+            let mut open_list: Vec<Field> = vec![];
+            let mut close_list: Vec<Field> = Vec::new();
 
 
 
