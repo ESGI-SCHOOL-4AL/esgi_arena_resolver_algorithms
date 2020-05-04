@@ -121,4 +121,20 @@ mod tests {
         assert_eq!(get_element_childs_from_fs_aps(sample_data.1.clone(), sample_data.2.clone(), 1).unwrap(), expected_result);
     }
 
+    #[test]
+    fn get_field_from_matrix_test() {
+        let (matrix, _, _) = testing_data();
+        let index_field = Point {
+            x: Some(1),
+            y: Some(1)
+        };
+        let result_field = Field {
+            coordinates: index_field.clone(),
+            move_cost: None,
+            value: Some(2)
+        };
+
+        assert_eq!(get_field_from_matrix(matrix, index_field).unwrap(), result_field);
+    }
+
 }

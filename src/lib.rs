@@ -20,8 +20,8 @@ pub mod algorithms {
 
         #[derive(Debug, Clone, Copy, PartialEq)]
         pub struct Point {
-            pub x: Option<u8>,
-            pub y: Option<u8>
+            pub x: Option<usize>,
+            pub y: Option<usize>
         }
 
         impl Point {
@@ -71,12 +71,12 @@ pub mod algorithms {
                         1 => if result_points.0 != Point::new() { 
                                 return Err("Cannot have many start points"); 
                             } else {
-                                result_points.0 = Point { x: Some(i as u8), y: Some(y as u8) };
+                                result_points.0 = Point { x: Some(i), y: Some(y) };
                             },
                         2 => if result_points.1 != Point::new() { 
                                 return Err("Cannot have many end points"); 
                             } else {
-                                result_points.1 = Point { x: Some(i as u8), y: Some(y as u8) };
+                                result_points.1 = Point { x: Some(i), y: Some(y) };
                             },
                         _ => continue
                     }
@@ -221,8 +221,8 @@ pub mod algorithms {
                     if index as i8 - 1 >= 0 {
                         fs.push(Field {
                             coordinates: Point {
-                                x: Some(line_index as u8),
-                                y: Some(index as u8 - 1)
+                                x: Some(line_index),
+                                y: Some(index - 1)
                             },
                             move_cost: None,
                             value: matrix.get(line_index).unwrap().get(index - 1).cloned()
@@ -233,8 +233,8 @@ pub mod algorithms {
                     if index as i8 + 1 < matrix.len() as i8 {
                         fs.push(Field {
                             coordinates: Point {
-                                x: Some(line_index as u8),
-                                y: Some(index as u8 + 1)
+                                x: Some(line_index),
+                                y: Some(index + 1)
                             },
                             move_cost: None,
                             value: matrix.get(line_index).unwrap().get(index + 1).cloned()
@@ -245,8 +245,8 @@ pub mod algorithms {
                     if line_index as i8 - 1 >= 0 {
                         fs.push(Field {
                             coordinates: Point {
-                                x: Some(line_index as u8 - 1),
-                                y: Some(index as u8)
+                                x: Some(line_index - 1),
+                                y: Some(index)
                             },
                             move_cost: None,
                             value: matrix.get(line_index - 1).unwrap().get(index).cloned()
@@ -257,8 +257,8 @@ pub mod algorithms {
                     if line_index as i8 + 1 < matrix.len() as i8 {
                         fs.push(Field {
                             coordinates: Point {
-                                x: Some(line_index as u8 + 1),
-                                y: Some(index as u8)
+                                x: Some(line_index + 1),
+                                y: Some(index)
                             },
                             move_cost: None,
                             value: matrix.get(line_index + 1).unwrap().get(index).cloned()
@@ -271,6 +271,45 @@ pub mod algorithms {
             }
 
             return Ok((fs, aps));
+        }
+
+        pub fn get_field_from_matrix(matrix_bord: Vec<Vec<i8>>, index: Point) -> Result<Field, &'static str> {
+            let matrix_ligne_number = matrix_bord.len();
+
+            let message_option = bord_is_well_form(matrix_bord.as_slice());
+
+            if message_option.is_some() {
+                return Err(message_option.unwrap());
+            }
+
+            let mut result_field: Field = Field::new();
+
+            for (i, matrix_line) in matrix_bord.iter().enumerate() {
+                if matrix_line.len() != matrix_ligne_number {
+                    return Err("The number of colunms should be equals to the number of lines");
+                }
+
+                if i != index.x.unwrap() {
+                    continue;
+                }
+
+                result_field.coordinates.x = Some(i);
+
+                for (y, value) in matrix_line.iter().enumerate() {
+                    if y != index.y.unwrap() {
+                        continue;
+                    }
+
+                    result_field.coordinates.y = Some(y);
+                    result_field.value = Some(value.clone());
+                } 
+            }
+
+            if index.x.is_none() || index.y.is_none() {
+                return Err("The target point cannot be found inside the matrix");
+            }
+
+            return Ok(result_field);
         }
 
         pub fn get_element_childs_from_fs_aps(fs: Vec<Field>, aps: Vec<u8>, index: usize) -> Result<Vec<Field>, &'static str> {
@@ -287,6 +326,19 @@ pub mod algorithms {
                 .map(|(_, element)| element.clone())
                 .collect());
 
+        }
+
+        pub fn a_star_resolver(fs: Vec<Field>, aps: Vec<u8>, start_point: Point) -> Result<Vec<Point>, &'static str> {
+            let mut open_list: Vec<Field> = Vec::new();
+            let mut close_list: Vec<Field> = Vec::new();
+
+            if fs == Vec::new() || aps == Vec::new() || start_point == Point::new() {
+                return Err("The parameters MUST be initializes");
+            }
+
+
+
+            return Err("Work in progress");
         }
 
         #[cfg(test)]
