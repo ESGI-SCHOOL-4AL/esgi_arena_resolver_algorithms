@@ -1,10 +1,27 @@
 pub mod algorithms {
     pub mod a_star {
         #[derive(Debug, Clone, Copy, PartialEq)]
+        pub struct AStarField {
+            pub wrapped_field: Field,
+            pub parent_field: Option<Field>,
+            pub move_cost: Option<u8>
+            
+        }
+
+        impl AStarField {
+            fn new() -> Self {
+                return Self {
+                    wrapped_field: Field::new(),
+                    parent_field: None,
+                    move_cost: None
+                };
+            }
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq)]
         pub struct Field {
             pub coordinates: Point,
-            pub value: Option<i8>,
-            pub move_cost: Option<u8>
+            pub value: Option<i8>
 
         }
 
@@ -12,8 +29,7 @@ pub mod algorithms {
             fn new() -> Self {
                 return Self {
                     coordinates: Point::new(),
-                    value: None,
-                    move_cost: None
+                    value: None
                 };
             }
         }
@@ -131,7 +147,7 @@ pub mod algorithms {
         /// use esgi_arena_resolver_algorithms::algorithms::a_star::Field;
         /// use esgi_arena_resolver_algorithms::algorithms::a_star::fs_aps_from_matrix;
         ///
-        /// let data_sample: Vec<Vec<i8>> = vec![
+        /// let sample_data: Vec<Vec<i8>> = vec![
         ///     vec![0, 1], 
         ///     vec![0, 2]
         /// ];
@@ -141,7 +157,6 @@ pub mod algorithms {
         ///             x: Some(0),
         ///             y: Some(1)
         ///         },
-        ///         move_cost: None,
         ///         value: Some(1)
         ///      },
         ///      Field {
@@ -149,7 +164,6 @@ pub mod algorithms {
         ///             x: Some(1),
         ///             y: Some(0)
         ///         },
-        ///         move_cost: None,
         ///         value: Some(0)
         ///      },
         ///      Field {
@@ -157,7 +171,6 @@ pub mod algorithms {
         ///             x: Some(0),
         ///             y: Some(0)
         ///         },
-        ///         move_cost: None,
         ///         value: Some(0)
         ///      },
         ///      Field {
@@ -165,7 +178,6 @@ pub mod algorithms {
         ///             x: Some(1),
         ///             y: Some(1)
         ///         },
-        ///         move_cost: None,
         ///         value: Some(2)
         ///      },
         ///      Field {
@@ -173,7 +185,6 @@ pub mod algorithms {
         ///             x: Some(1),
         ///             y: Some(1)
         ///         },
-        ///         move_cost: None,
         ///         value: Some(2)
         ///      },
         ///      Field {
@@ -181,7 +192,6 @@ pub mod algorithms {
         ///             x: Some(0),
         ///             y: Some(0)
         ///         },
-        ///         move_cost: None,
         ///         value: Some(0)
         ///      },
         ///      Field {
@@ -189,7 +199,6 @@ pub mod algorithms {
         ///             x: Some(1),
         ///             y: Some(0)
         ///         },
-        ///         move_cost: None,
         ///         value: Some(0)
         ///      },
         ///      Field {
@@ -197,12 +206,11 @@ pub mod algorithms {
         ///             x: Some(0),
         ///             y: Some(1)
         ///         },
-        ///         move_cost: None,
         ///         value: Some(1)
         ///      } 
         /// ];
         /// let expect_aps = vec![0, 2, 4, 6, 8];
-        /// assert_eq!(fs_aps_from_matrix(data_sample).unwrap(), (expect_fs, expect_aps));
+        /// assert_eq!(fs_aps_from_matrix(sample_data).unwrap(), (expect_fs, expect_aps));
         /// ```
         pub fn fs_aps_from_matrix(matrix: Vec<Vec<i8>>) -> Result<(Vec<Field>, Vec<u8>), &'static str> {
             let message_option = bord_is_well_form(matrix.as_slice());
@@ -224,7 +232,7 @@ pub mod algorithms {
                                 x: Some(line_index),
                                 y: Some(index - 1)
                             },
-                            move_cost: None,
+                            
                             value: matrix.get(line_index).unwrap().get(index - 1).cloned()
                          });
                          current_aps_index += 1;
@@ -236,7 +244,7 @@ pub mod algorithms {
                                 x: Some(line_index),
                                 y: Some(index + 1)
                             },
-                            move_cost: None,
+                            
                             value: matrix.get(line_index).unwrap().get(index + 1).cloned()
                          });
                          current_aps_index += 1;
@@ -248,7 +256,7 @@ pub mod algorithms {
                                 x: Some(line_index - 1),
                                 y: Some(index)
                             },
-                            move_cost: None,
+                            
                             value: matrix.get(line_index - 1).unwrap().get(index).cloned()
                          });
                          current_aps_index += 1;
@@ -260,7 +268,7 @@ pub mod algorithms {
                                 x: Some(line_index + 1),
                                 y: Some(index)
                             },
-                            move_cost: None,
+                            
                             value: matrix.get(line_index + 1).unwrap().get(index).cloned()
                          });
                          current_aps_index += 1;
@@ -328,17 +336,52 @@ pub mod algorithms {
 
         }
 
-        pub fn a_star_resolver(fs: Vec<Field>, aps: Vec<u8>, start_point: Point) -> Result<Vec<Point>, &'static str> {
-            if fs == Vec::new() || aps == Vec::new() || start_point == Point::new() {
-                return Err("The parameters MUST be initializes");
+        // pub fn a_star_resolver(fs: Vec<Field>, aps: Vec<u8>, (start_point: Field, end_point: Field)) -> Result<Vec<Point>, &'static str> {
+        //     if fs == Vec::new() || aps == Vec::new() || start_point == Field::new() {
+        //         return Err("The parameters MUST be initializes");
+        //     }
+
+        //     let start_field = AStarField {
+        //         wrapped_field: start_point,
+        //         parent_field: None,
+        //         move_cost: 
+        //     };
+
+        //     let mut open_list: Vec<AStarField> = vec![start_point];
+        //     let mut close_list: Vec<AStarField> = Vec::new();
+
+        //     while ! open_list.is_empty() {
+                
+        //     }
+            
+
+        //     return Err("Work in progress");
+        // }
+
+        fn quicksort(to_sort: &mut [AStarField]) {
+            if ! to_sort.is_empty() {
+                let partition_index = quicksort_partition(to_sort);
+                let to_sort_lenght = to_sort.len();
+                
+                quicksort(&mut to_sort[0..partition_index]);
+                quicksort(&mut to_sort[partition_index + 1..to_sort_lenght]);
             }
+        }
 
-            let mut open_list: Vec<Field> = vec![];
-            let mut close_list: Vec<Field> = Vec::new();
-
-
-
-            return Err("Work in progress");
+        fn quicksort_partition(to_partition: &mut [AStarField]) -> usize {
+            let pivot = to_partition[to_partition.len() - 1].move_cost.unwrap();
+            let mut x = 0;
+    
+            for i in 0..to_partition.len() - 1 {
+                if to_partition[i].move_cost.unwrap() <= pivot {
+                    to_partition.swap(x, i);
+                    x += 1;
+                }
+            }
+            
+            to_partition.swap(x, to_partition.len() - 1);
+            
+            return x;
         }
 
         #[cfg(test)]
@@ -347,93 +390,112 @@ pub mod algorithms {
 
             #[test]
             fn bord_is_well_form_test() {
-                let data_sample: Vec<Vec<i8>> = vec![
+                let sample_data: Vec<Vec<i8>> = vec![
                     vec![0; 5],
                     vec![0, 1, 0, 0, 0], 
                     vec![0, 0, 2, 0, 0], 
                     vec![0; 5],
                     vec![0; 5]
                 ];
-                assert_eq!(bord_is_well_form(data_sample.as_slice()), None);
+                assert_eq!(bord_is_well_form(sample_data.as_slice()), None);
             }
 
             #[test]
             fn bord_is_well_form_empty() {
-                let data_sample: Vec<Vec<i8>> = Vec::new();
-                assert_eq!(bord_is_well_form(data_sample.as_slice()).unwrap(), "The bord cannot be empty");
+                let sample_data: Vec<Vec<i8>> = Vec::new();
+                assert_eq!(bord_is_well_form(sample_data.as_slice()).unwrap(), "The bord cannot be empty");
             }
 
             #[test]
             fn bord_is_well_form_too_shorter() {
-                let data_sample: Vec<Vec<i8>> = vec![
+                let sample_data: Vec<Vec<i8>> = vec![
                     vec![0; 5],
                 ];
-                assert_eq!(bord_is_well_form(data_sample.as_slice()).unwrap(), "The bord size cannot be shorter than 2 lignes");
+                assert_eq!(bord_is_well_form(sample_data.as_slice()).unwrap(), "The bord size cannot be shorter than 2 lignes");
             }
 
             #[test]
             fn bord_is_well_form_too_bigger() {
-                let data_sample: Vec<Vec<i8>> = vec![vec!(0; 21); 21];
-                assert_eq!(bord_is_well_form(data_sample.as_slice()).unwrap(), "The bord size cannot be bigger than 20 lignes");
+                let sample_data: Vec<Vec<i8>> = vec![vec!(0; 21); 21];
+                assert_eq!(bord_is_well_form(sample_data.as_slice()).unwrap(), "The bord size cannot be bigger than 20 lignes");
             }
             
             #[test]
             fn get_start_to_end_points_test() {
-                let data_sample: Vec<Vec<i8>> = vec![
+                let sample_data: Vec<Vec<i8>> = vec![
                     vec![0; 5],
                     vec![0, 1, 0, 0, 0], 
                     vec![0, 0, 2, 0, 0], 
                     vec![0; 5],
                     vec![0; 5]
                 ];
-                assert_eq!(get_start_to_end_points(data_sample).unwrap(), (Point { x: Some(1), y: Some(1) }, Point { x: Some(2), y: Some(2) }));
+                assert_eq!(get_start_to_end_points(sample_data).unwrap(), (Point { x: Some(1), y: Some(1) }, Point { x: Some(2), y: Some(2) }));
             }
 
             #[test]
             #[should_panic(expected = "The bord cannot be empty")]
             fn get_start_to_end_points_empty() {
-                let data_sample: Vec<Vec<i8>> = Vec::new();
-                get_start_to_end_points(data_sample).unwrap();
+                let sample_data: Vec<Vec<i8>> = Vec::new();
+                get_start_to_end_points(sample_data).unwrap();
             }
 
             #[test]
             #[should_panic(expected = "The bord size cannot be bigger than 20 lignes")]
             fn get_start_to_end_points_too_bigger() {
-                let data_sample: Vec<Vec<i8>> = vec![vec![0; 21]; 21];
-                get_start_to_end_points(data_sample).unwrap();
+                let sample_data: Vec<Vec<i8>> = vec![vec![0; 21]; 21];
+                get_start_to_end_points(sample_data).unwrap();
             }
 
             #[test]
             #[should_panic(expected = "The bord size cannot be shorter than 2 lignes")]
             fn get_start_to_end_points_too_lower() {
-                let data_sample: Vec<Vec<i8>> = vec![vec![0; 1]; 1];
-                get_start_to_end_points(data_sample).unwrap();
+                let sample_data: Vec<Vec<i8>> = vec![vec![0; 1]; 1];
+                get_start_to_end_points(sample_data).unwrap();
             }
 
             #[test]
             #[should_panic(expected = "Cannot have many end points")]
             fn get_start_to_end_points_many_end() {
-                let data_sample: Vec<Vec<i8>> = vec![
+                let sample_data: Vec<Vec<i8>> = vec![
                     vec![0; 5],
                     vec![0, 1, 0, 0, 0], 
                     vec![0, 0, 2, 0, 0], 
                     vec![0, 0, 0, 0, 2],
                     vec![0; 5]
                 ];
-                get_start_to_end_points(data_sample).unwrap();
+                get_start_to_end_points(sample_data).unwrap();
             }
 
             #[test]
             #[should_panic(expected = "Cannot have many start points")]
             fn get_start_to_end_points_many_start() {
-                let data_sample: Vec<Vec<i8>> = vec![
+                let sample_data: Vec<Vec<i8>> = vec![
                     vec![0; 5],
                     vec![0, 1, 0, 0, 0], 
                     vec![0, 0, 2, 0, 0], 
                     vec![1, 0, 0, 0, 0],
                     vec![0; 5]
                 ];
-                get_start_to_end_points(data_sample).unwrap();
+                get_start_to_end_points(sample_data).unwrap();
+            }
+
+            #[test]
+            fn quicksort_test() {
+                let mut sample_data: Vec<AStarField> = vec![
+                    AStarField { wrapped_field: Field::new(), parent_field: Some(Field::new()), move_cost: Some(10) },
+                    AStarField { wrapped_field: Field::new(), parent_field: Some(Field::new()), move_cost: Some(11) },
+                    AStarField { wrapped_field: Field::new(), parent_field: Some(Field::new()), move_cost: Some(9) },
+                    AStarField { wrapped_field: Field::new(), parent_field: Some(Field::new()), move_cost: Some(15) }
+                ];
+                let expected_output = vec![
+                    AStarField { wrapped_field: Field::new(), parent_field: Some(Field::new()), move_cost: Some(9) },
+                    AStarField { wrapped_field: Field::new(), parent_field: Some(Field::new()), move_cost: Some(10) },
+                    AStarField { wrapped_field: Field::new(), parent_field: Some(Field::new()), move_cost: Some(11) },
+                    AStarField { wrapped_field: Field::new(), parent_field: Some(Field::new()), move_cost: Some(15) }
+                ];
+                quicksort(&mut sample_data[..]);
+
+                assert_eq!(sample_data, expected_output);
             }
         }
     }

@@ -14,7 +14,6 @@ mod tests {
                     x: Some(0),
                     y: Some(1)
                 },
-                move_cost: None,
                 value: Some(1)
             },
             Field {
@@ -22,7 +21,6 @@ mod tests {
                     x: Some(1),
                     y: Some(0)
                 },
-                move_cost: None,
                 value: Some(0)
             },
             Field {
@@ -30,7 +28,6 @@ mod tests {
                     x: Some(0),
                     y: Some(0)
                 },
-                move_cost: None,
                 value: Some(0)
             },
             Field {
@@ -38,7 +35,6 @@ mod tests {
                     x: Some(1),
                     y: Some(1)
                 },
-                move_cost: None,
                 value: Some(2)
             },
             Field {
@@ -46,7 +42,6 @@ mod tests {
                     x: Some(1),
                     y: Some(1)
                 },
-                move_cost: None,
                 value: Some(2)
             },
             Field {
@@ -54,7 +49,6 @@ mod tests {
                     x: Some(0),
                     y: Some(0)
                 },
-                move_cost: None,
                 value: Some(0)
             },
             Field {
@@ -62,7 +56,6 @@ mod tests {
                     x: Some(1),
                     y: Some(0)
                 },
-                move_cost: None,
                 value: Some(0)
             },
             Field {
@@ -70,7 +63,6 @@ mod tests {
                     x: Some(0),
                     y: Some(1)
                 },
-                move_cost: None,
                 value: Some(1)
             }
             
@@ -105,7 +97,6 @@ mod tests {
                     x: Some(0),
                     y: Some(0)
                 },
-                move_cost: None,
                 value: Some(0)
             },
             Field {
@@ -113,7 +104,6 @@ mod tests {
                     x: Some(1),
                     y: Some(1)
                 },
-                move_cost: None,
                 value: Some(2)
             }
         ];
@@ -130,7 +120,6 @@ mod tests {
         };
         let result_field = Field {
             coordinates: index_field.clone(),
-            move_cost: None,
             value: Some(2)
         };
 
