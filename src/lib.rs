@@ -1,9 +1,9 @@
 pub mod algorithms {
     pub mod a_star {
-        #[derive(Debug, Clone, Copy, PartialEq)]
+        #[derive(Debug, Clone, PartialEq)]
         pub struct AStarField {
             pub wrapped_field: Field,
-            pub parent_field: Option<Field>,
+            pub parent_field: Option<Box<Self>>,
             pub move_cost: Option<u8>
             
         }
@@ -46,6 +46,14 @@ pub mod algorithms {
                     x: None,
                     y: None
                 };
+            }
+
+            fn get_index(&self) -> Result<usize, &'static str> {
+                if self.x.is_none() || self.y.is_none() {
+                    return Err("The x and y must be declare for get a index");
+                }
+
+                return Ok(self.x.unwrap() + self.y.unwrap());
             }
         }
 
@@ -336,27 +344,56 @@ pub mod algorithms {
 
         }
 
-        // pub fn a_star_resolver(fs: Vec<Field>, aps: Vec<u8>, (start_point: Field, end_point: Field)) -> Result<Vec<Point>, &'static str> {
-        //     if fs == Vec::new() || aps == Vec::new() || start_point == Field::new() {
-        //         return Err("The parameters MUST be initializes");
-        //     }
+        pub fn a_star_resolver(fs: Vec<Field>, aps: Vec<u8>, start_end_point: (Field, Field)) -> Result<Vec<Point>, &'static str> {
+            if fs == Vec::new() || aps == Vec::new() || start_end_point == (Field::new(), Field::new()) {
+                return Err("The parameters MUST be initializes");
+            }
 
-        //     let start_field = AStarField {
-        //         wrapped_field: start_point,
-        //         parent_field: None,
-        //         move_cost: 
-        //     };
+            let (start_point, end_point) = start_end_point;
 
-        //     let mut open_list: Vec<AStarField> = vec![start_point];
-        //     let mut close_list: Vec<AStarField> = Vec::new();
+            let start_field = AStarField {
+                wrapped_field: start_point,
+                parent_field: None,
+                move_cost: Some(get_manhattan_distance_heuristic(start_point.coordinates, end_point.coordinates))
+            };
 
-        //     while ! open_list.is_empty() {
+            let mut open_list: Vec<AStarField> = vec![start_field];
+            let mut close_list: Vec<AStarField> = Vec::new();
+            let mut weight: u8 = 1;
+
+            while ! open_list.is_empty() {
+                quicksort(&mut open_list[..]);
+                open_list.reverse();
+
+                let current_a_star_field = open_list.pop();
+                close_list.push(current_a_star_field.clone().unwrap());
+
+                if current_a_star_field.clone().unwrap().wrapped_field.value.unwrap() == 2 {
+                    return Ok(get_index_road_from_parents(current_a_star_field.unwrap()).unwrap());
+                }
+
+                let current_a_star_field_index = current_a_star_field.clone().unwrap().wrapped_field.coordinates.get_index();
                 
-        //     }
+                let current_a_star_field_childs = get_element_childs_from_fs_aps(fs.clone(), aps.clone(), current_a_star_field_index?);
+                
+                for child in current_a_star_field_childs? {
+                    let a_star_child = AStarField {
+                        wrapped_field: child,
+                        move_cost: Some(weight + get_manhattan_distance_heuristic(current_a_star_field.clone().unwrap().wrapped_field.coordinates, end_point.coordinates)),
+                        parent_field: Some(Box::new(current_a_star_field.clone().unwrap()))
+
+                    };
+
+                    open_list.push(a_star_child);
+                }
+
+                weight += 1;
+
+            }
             
 
-        //     return Err("Work in progress");
-        // }
+            return Err("Work in progress");
+        }
 
         fn quicksort(to_sort: &mut [AStarField]) {
             if ! to_sort.is_empty() {
@@ -382,6 +419,25 @@ pub mod algorithms {
             to_partition.swap(x, to_partition.len() - 1);
             
             return x;
+        }
+
+        fn get_index_road_from_parents(mut final_a_star_field: AStarField) -> Option<Vec<Point>> {
+            if final_a_star_field.parent_field.is_none() {
+                return None;
+            }
+
+            let mut start_to_end_road: Vec<Point> = Vec::new();
+            
+            while final_a_star_field.parent_field.is_some() {
+                let current_field = final_a_star_field.wrapped_field;
+                start_to_end_road.push(current_field.coordinates);
+                final_a_star_field = *final_a_star_field.parent_field.unwrap();
+            }
+
+            start_to_end_road.push(final_a_star_field.wrapped_field.coordinates);
+            start_to_end_road.reverse();
+
+            return Some(start_to_end_road);
         }
 
         #[cfg(test)]
@@ -482,20 +538,49 @@ pub mod algorithms {
             #[test]
             fn quicksort_test() {
                 let mut sample_data: Vec<AStarField> = vec![
-                    AStarField { wrapped_field: Field::new(), parent_field: Some(Field::new()), move_cost: Some(10) },
-                    AStarField { wrapped_field: Field::new(), parent_field: Some(Field::new()), move_cost: Some(11) },
-                    AStarField { wrapped_field: Field::new(), parent_field: Some(Field::new()), move_cost: Some(9) },
-                    AStarField { wrapped_field: Field::new(), parent_field: Some(Field::new()), move_cost: Some(15) }
+                    AStarField { wrapped_field: Field::new(), parent_field: None, move_cost: Some(10) },
+                    AStarField { wrapped_field: Field::new(), parent_field: None, move_cost: Some(11) },
+                    AStarField { wrapped_field: Field::new(), parent_field: None, move_cost: Some(9) },
+                    AStarField { wrapped_field: Field::new(), parent_field: None, move_cost: Some(15) }
                 ];
                 let expected_output = vec![
-                    AStarField { wrapped_field: Field::new(), parent_field: Some(Field::new()), move_cost: Some(9) },
-                    AStarField { wrapped_field: Field::new(), parent_field: Some(Field::new()), move_cost: Some(10) },
-                    AStarField { wrapped_field: Field::new(), parent_field: Some(Field::new()), move_cost: Some(11) },
-                    AStarField { wrapped_field: Field::new(), parent_field: Some(Field::new()), move_cost: Some(15) }
+                    AStarField { wrapped_field: Field::new(), parent_field: None, move_cost: Some(9) },
+                    AStarField { wrapped_field: Field::new(), parent_field: None, move_cost: Some(10) },
+                    AStarField { wrapped_field: Field::new(), parent_field: None, move_cost: Some(11) },
+                    AStarField { wrapped_field: Field::new(), parent_field: None, move_cost: Some(15) }
                 ];
                 quicksort(&mut sample_data[..]);
 
                 assert_eq!(sample_data, expected_output);
+            }
+
+            #[test]
+            fn get_parents_list_test() {
+                let start_element = Box::new(AStarField { wrapped_field: Field { 
+                        coordinates: Point { x: Some(0), y: Some(1) }, 
+                        value: Some(1) 
+                    }, 
+                    parent_field: None, 
+                    move_cost: None 
+                });
+                let road_element = Box::new(AStarField { wrapped_field: Field { 
+                        coordinates: Point { x: Some(0), y: Some(0) }, 
+                        value: Some(1) 
+                    }, 
+                    parent_field: Some(start_element), 
+                    move_cost: None 
+                });
+                let road_end = Box::new(AStarField { wrapped_field: Field { 
+                        coordinates: Point { x: Some(1), y: Some(1) }, 
+                        value: Some(1) 
+                    }, 
+                    parent_field: Some(road_element), 
+                    move_cost: None 
+                });
+
+                let expected_output: Vec<Point> = vec![Point { x: Some(0), y: Some(1) }, Point { x: Some(0), y: Some(0) }, Point { x: Some(1), y: Some(1) }];
+
+                assert_eq!(get_index_road_from_parents(*road_end).unwrap(), expected_output);
             }
         }
     }
