@@ -126,4 +126,26 @@ mod tests {
         assert_eq!(get_field_by_index(matrix, index_field).unwrap(), result_field);
     }
 
+    #[test]
+    fn a_star_resolver_test() {
+        let (_, fs, aps) = testing_data();
+
+        let expected_output: Vec<Point> = vec![Point { x: Some(0), y: Some(1) }, Point { x: Some(1), y: Some(1) }];
+        let start_end = (Field {
+            coordinates: Point {
+                x: Some(0),
+                y: Some(1)
+            },
+            value: Some(1)
+        }, Field {
+            coordinates: Point {
+                x: Some(1),
+                y: Some(1)
+            },
+            value: Some(2)
+        },);
+
+        assert_eq!(a_star_resolver(fs, aps, start_end).unwrap(), expected_output);
+    }
+
 }

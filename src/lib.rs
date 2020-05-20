@@ -374,9 +374,13 @@ pub mod algorithms {
 
                 let current_a_star_field_index = current_a_star_field.clone().unwrap().wrapped_field.coordinates.get_index();
                 
-                let current_a_star_field_childs = get_element_childs_from_fs_aps(fs.clone(), aps.clone(), current_a_star_field_index?);
-                
-                for child in current_a_star_field_childs? {
+                let current_a_star_field_childs: Vec<Field> = get_element_childs_from_fs_aps(fs.clone(), aps.clone(), current_a_star_field_index?)?;
+
+                for child in current_a_star_field_childs {
+                    if child.value.unwrap() == -1 {
+                        continue;
+                    }
+
                     let a_star_child = AStarField {
                         wrapped_field: child,
                         move_cost: Some(weight + get_manhattan_distance_heuristic(current_a_star_field.clone().unwrap().wrapped_field.coordinates, end_point.coordinates)),
@@ -391,8 +395,7 @@ pub mod algorithms {
 
             }
             
-
-            return Err("Work in progress");
+            return Err("It seem that it has no end to this level");
         }
 
         fn quicksort(to_sort: &mut [AStarField]) {
