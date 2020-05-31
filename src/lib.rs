@@ -48,12 +48,12 @@ pub mod algorithms {
                 };
             }
 
-            fn get_index(&self) -> Result<usize, &'static str> {
-                if self.x.is_none() || self.y.is_none() {
+            fn get_index(&self, matrix_size: usize) -> Result<usize, &'static str> {
+                if self.x.is_none() || self.y.is_none() || matrix_size == 0 {
                     return Err("The x and y must be declare for get a index");
                 }
 
-                return Ok(self.x.unwrap() + self.y.unwrap());
+                return Ok(self.x.unwrap() * matrix_size + self.y.unwrap());
             }
         }
 
@@ -334,17 +334,19 @@ pub mod algorithms {
             }
 
             let fs_start_index = aps.get(index).unwrap().clone() as usize;
-            let fs_end_index = (fs_start_index + 1) as usize;
+            let fs_end_index = aps.get(index + 1).unwrap().clone() as usize;
+
+            println!("start: {}, end: {}", fs_start_index, fs_end_index);
 
             return Ok(fs.iter()
                 .enumerate()
-                .filter(|(index, _)| index >= &fs_start_index && index <= &fs_end_index)
+                .filter(|(index, _)| index >= &fs_start_index && index < &fs_end_index)
                 .map(|(_, element)| element.clone())
                 .collect());
 
         }
 
-        pub fn a_star_resolver(fs: Vec<Field>, aps: Vec<u8>, start_end_point: (Field, Field)) -> Result<Vec<Point>, &'static str> {
+        pub fn a_star_resolver(fs: Vec<Field>, aps: Vec<u8>, matrix_size: usize, start_end_point: (Field, Field)) -> Result<Vec<Point>, &'static str> {
             if fs == Vec::new() || aps == Vec::new() || start_end_point == (Field::new(), Field::new()) {
                 return Err("The parameters MUST be initializes");
             }
@@ -372,21 +374,39 @@ pub mod algorithms {
                     return Ok(get_index_road_from_parents(current_a_star_field.unwrap()).unwrap());
                 }
 
-                let current_a_star_field_index = current_a_star_field.clone().unwrap().wrapped_field.coordinates.get_index();
-                
+                let current_a_star_field_index = current_a_star_field.clone().unwrap().wrapped_field.coordinates.get_index(matrix_size);
                 let current_a_star_field_childs: Vec<Field> = get_element_childs_from_fs_aps(fs.clone(), aps.clone(), current_a_star_field_index?)?;
 
                 for child in current_a_star_field_childs {
+                    let mut is_invalid_son = false;
+
                     if child.value.unwrap() == -1 {
-                        continue;
+                        is_invalid_son = true;
+                    }
+
+                    for closed_field in close_list.clone() {
+                        if closed_field.wrapped_field == child {
+                            is_invalid_son = true;
+                        }
                     }
 
                     let a_star_child = AStarField {
-                        wrapped_field: child,
-                        move_cost: Some(weight + get_manhattan_distance_heuristic(current_a_star_field.clone().unwrap().wrapped_field.coordinates, end_point.coordinates)),
+                        wrapped_field: child.clone(),
+                        move_cost: Some(weight + get_manhattan_distance_heuristic(child.clone().coordinates, end_point.coordinates)),
                         parent_field: Some(Box::new(current_a_star_field.clone().unwrap()))
 
                     };
+
+                    for opened_field in open_list.clone() {
+                        if opened_field.wrapped_field == child 
+                            && a_star_child.move_cost.unwrap() < opened_field.move_cost.unwrap(){
+                            is_invalid_son = true;
+                        }
+                    }
+
+                    if is_invalid_son {
+                        continue;
+                    }
 
                     open_list.push(a_star_child);
                 }
