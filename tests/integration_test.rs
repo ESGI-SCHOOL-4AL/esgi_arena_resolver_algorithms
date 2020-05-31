@@ -270,6 +270,8 @@ mod tests {
         return (matrix_example, fs_example, aps_example);
     }
 
+    
+
     fn testing_data_no_road() -> (Vec<Vec<i8>>, Vec<Field>, Vec<u8>) {
         let matrix_example: Vec<Vec<i8>> = vec![
             vec![-1, 1], 
@@ -340,6 +342,81 @@ mod tests {
         let aps_example: Vec<u8> = vec![0, 2, 4, 6, 8];
 
         return (matrix_example, fs_example, aps_example);
+    }
+
+    #[test]
+    #[should_panic(expected = "The bord cannot be empty")]
+    fn get_start_to_end_points_empty() {
+        let sample_data: Vec<Vec<i8>> = Vec::new();
+        get_start_to_end_points(sample_data).unwrap();
+    }
+
+    #[test]
+    #[should_panic(expected = "The bord size cannot be bigger than 20 lignes")]
+    fn get_start_to_end_points_too_bigger() {
+        let sample_data: Vec<Vec<i8>> = vec![vec![0; 21]; 21];
+        get_start_to_end_points(sample_data).unwrap();
+    }
+
+    #[test]
+    #[should_panic(expected = "The bord size cannot be shorter than 2 lignes")]
+    fn get_start_to_end_points_too_lower() {
+        let sample_data: Vec<Vec<i8>> = vec![vec![0; 1]; 1];
+        get_start_to_end_points(sample_data).unwrap();
+    }
+
+    #[test]
+    #[should_panic(expected = "Cannot have many end points")]
+    fn get_start_to_end_points_many_end() {
+        let sample_data: Vec<Vec<i8>> = vec![
+            vec![0; 5],
+            vec![0, 1, 0, 0, 0], 
+            vec![0, 0, 2, 0, 0], 
+            vec![0, 0, 0, 0, 2],
+            vec![0; 5]
+        ];
+        get_start_to_end_points(sample_data).unwrap();
+    }
+
+    #[test]
+    #[should_panic(expected = "Cannot have many start points")]
+    fn get_start_to_end_points_many_start() {
+        let sample_data: Vec<Vec<i8>> = vec![
+            vec![0; 5],
+            vec![0, 1, 0, 0, 0], 
+            vec![0, 0, 2, 0, 0], 
+            vec![1, 0, 0, 0, 0],
+            vec![0; 5]
+        ];
+        get_start_to_end_points(sample_data).unwrap();
+    }
+
+    #[test]
+    fn get_start_to_end_points_multi_roads_test() {
+        let sample_data: Vec<Vec<i8>> = vec![
+            vec![0; 5],
+            vec![0, -1, -1, -1, 2], 
+            vec![0, 0, 2, 0, 0], 
+            vec![1, -1, 0, 0, 2],
+            vec![0; 5]
+        ];
+        let start_point = Point { x: Some(3), y: Some(0) };
+        let end_points = vec![Point {
+            x: Some(1),
+            y: Some(4)
+        },
+        Point {
+            x: Some(2),
+            y: Some(2)
+        },
+        Point {
+            x: Some(3),
+            y: Some(4)
+        }
+        ];
+        let expected_output: (Point, Vec<Point>) = (start_point, end_points);
+
+        assert_eq!(get_start_to_end_points_multi_roads(sample_data).unwrap(), expected_output);
     }
 
     #[test]

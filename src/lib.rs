@@ -75,7 +75,7 @@ pub mod algorithms {
             return None;
         }
 
-        fn get_start_to_end_points(matrix_bord: Vec<Vec<i8>>) -> Result<(Point, Point), &'static str> {
+        pub fn get_start_to_end_points(matrix_bord: Vec<Vec<i8>>) -> Result<(Point, Point), &'static str> {
             let matrix_ligne_number = matrix_bord.len();
             let mut result_points: (Point, Point) = (Point::new(), Point::new());
 
@@ -114,6 +114,41 @@ pub mod algorithms {
             return Ok(result_points);
         }
 
+        pub fn get_start_to_end_points_multi_roads(matrix_bord: Vec<Vec<i8>>) -> Result<(Point, Vec<Point>), &'static str> {
+            let matrix_ligne_number = matrix_bord.len();
+            let mut result_points: (Point, Vec<Point>) = (Point::new(), Vec::new());
+
+            let message_option = bord_is_well_form(matrix_bord.as_slice());
+
+            if message_option.is_some() {
+                return Err(message_option.unwrap());
+            }
+
+            for (i, matrix_line) in matrix_bord.iter().enumerate() {
+                if matrix_line.len() != matrix_ligne_number {
+                    return Err("The number of colunms should be equals to the number of lines");
+                }
+
+                for (y, point_value) in matrix_line.iter().enumerate() {
+                    match point_value {
+                        1 => if result_points.0 != Point::new() { 
+                                return Err("Cannot have many start points"); 
+                            } else {
+                                result_points.0 = Point { x: Some(i), y: Some(y) };
+                            },
+                        2 =>  result_points.1.push(Point { x: Some(i), y: Some(y) }),
+                        _ => continue
+                    }
+                }
+            }
+
+            if result_points.0 == Point::new() || result_points.1.is_empty() {
+                return Err("A start point and a end point are required");
+            }
+
+            return Ok(result_points);
+        }
+        
         /// Get heuristic value from start point to the target.
         /// 
         /// [For more explanations](https://xlinux.nist.gov/dads//HTML/manhattanDistance.html)
@@ -346,6 +381,10 @@ pub mod algorithms {
 
         }
 
+        // pub fn a_star_multi_roads_resolver(fs: Vec<Field>, aps: Vec<u8>, matrix_size: usize, start_end_point: (Field, Field)) -> Result<Vec<Vec<Point>>, &'static str> {
+
+        // }
+
         pub fn a_star_resolver(fs: Vec<Field>, aps: Vec<u8>, matrix_size: usize, start_end_point: (Field, Field)) -> Result<Vec<Point>, &'static str> {
             if fs == Vec::new() || aps == Vec::new() || start_end_point == (Field::new(), Field::new()) {
                 return Err("The parameters MUST be initializes");
@@ -509,53 +548,6 @@ pub mod algorithms {
                     vec![0; 5]
                 ];
                 assert_eq!(get_start_to_end_points(sample_data).unwrap(), (Point { x: Some(1), y: Some(1) }, Point { x: Some(2), y: Some(2) }));
-            }
-
-            #[test]
-            #[should_panic(expected = "The bord cannot be empty")]
-            fn get_start_to_end_points_empty() {
-                let sample_data: Vec<Vec<i8>> = Vec::new();
-                get_start_to_end_points(sample_data).unwrap();
-            }
-
-            #[test]
-            #[should_panic(expected = "The bord size cannot be bigger than 20 lignes")]
-            fn get_start_to_end_points_too_bigger() {
-                let sample_data: Vec<Vec<i8>> = vec![vec![0; 21]; 21];
-                get_start_to_end_points(sample_data).unwrap();
-            }
-
-            #[test]
-            #[should_panic(expected = "The bord size cannot be shorter than 2 lignes")]
-            fn get_start_to_end_points_too_lower() {
-                let sample_data: Vec<Vec<i8>> = vec![vec![0; 1]; 1];
-                get_start_to_end_points(sample_data).unwrap();
-            }
-
-            #[test]
-            #[should_panic(expected = "Cannot have many end points")]
-            fn get_start_to_end_points_many_end() {
-                let sample_data: Vec<Vec<i8>> = vec![
-                    vec![0; 5],
-                    vec![0, 1, 0, 0, 0], 
-                    vec![0, 0, 2, 0, 0], 
-                    vec![0, 0, 0, 0, 2],
-                    vec![0; 5]
-                ];
-                get_start_to_end_points(sample_data).unwrap();
-            }
-
-            #[test]
-            #[should_panic(expected = "Cannot have many start points")]
-            fn get_start_to_end_points_many_start() {
-                let sample_data: Vec<Vec<i8>> = vec![
-                    vec![0; 5],
-                    vec![0, 1, 0, 0, 0], 
-                    vec![0, 0, 2, 0, 0], 
-                    vec![1, 0, 0, 0, 0],
-                    vec![0; 5]
-                ];
-                get_start_to_end_points(sample_data).unwrap();
             }
 
             #[test]
