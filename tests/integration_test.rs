@@ -270,6 +270,203 @@ mod tests {
         return (matrix_example, fs_example, aps_example);
     }
 
+    fn testing_data_heavy_matrix_multi_end() -> (Vec<Vec<i8>>, Vec<Field>, Vec<u8>) {
+        let matrix_example: Vec<Vec<i8>> = vec![
+            vec![2, 0, 0], 
+            vec![-1, -1, 0],
+            vec![1, 0, 2]
+        ];
+
+        let matrix_first_line = vec![Field {
+            coordinates: Point {
+                x: Some(0),
+                y: Some(1)
+            },
+            value: Some(0)
+        },
+        Field {
+            coordinates: Point {
+                x: Some(1),
+                y: Some(0)
+            },
+            value: Some(-1)
+        },
+
+        Field {
+            coordinates: Point {
+                x: Some(0),
+                y: Some(0)
+            },
+            value: Some(2)
+        },
+        Field {
+            coordinates: Point {
+                x: Some(0),
+                y: Some(2)
+            },
+            value: Some(0)
+        },
+        Field {
+            coordinates: Point {
+                x: Some(1),
+                y: Some(1)
+            },
+            value: Some(-1)
+        },
+
+        Field {
+            coordinates: Point {
+                x: Some(0),
+                y: Some(1)
+            },
+            value: Some(0)
+        },
+        Field {
+            coordinates: Point {
+                x: Some(1),
+                y: Some(2)
+            },
+            value: Some(0)
+        }];
+
+        let matrix_second_line = vec![Field {
+            coordinates: Point {
+                x: Some(0),
+                y: Some(0)
+            },
+            value: Some(2)
+        },
+        Field {
+            coordinates: Point {
+                x: Some(2),
+                y: Some(0)
+            },
+            value: Some(1)
+        },
+        Field {
+            coordinates: Point {
+                x: Some(1),
+                y: Some(1)
+            },
+            value: Some(-1)
+        },
+
+        Field {
+            coordinates: Point {
+                x: Some(0),
+                y: Some(1)
+            },
+            value: Some(0)
+        },
+        Field {
+            coordinates: Point {
+                x: Some(1),
+                y: Some(0)
+            },
+            value: Some(-1)
+        },
+        Field {
+            coordinates: Point {
+                x: Some(1),
+                y: Some(2)
+            },
+            value: Some(0)
+        },
+        Field {
+            coordinates: Point {
+                x: Some(2),
+                y: Some(1)
+            },
+            value: Some(0)
+        },
+
+        Field {
+            coordinates: Point {
+                x: Some(0),
+                y: Some(2)
+            },
+            value: Some(0)
+        },
+        Field {
+            coordinates: Point {
+                x: Some(1),
+                y: Some(1)
+            },
+            value: Some(-1)
+        },
+        Field {
+            coordinates: Point {
+                x: Some(2),
+                y: Some(2)
+            },
+            value: Some(2)
+        }];
+
+        let matrix_third_line = vec![Field {
+            coordinates: Point {
+                x: Some(1),
+                y: Some(0)
+            },
+            value: Some(-1)
+        },
+        Field {
+            coordinates: Point {
+                x: Some(2),
+                y: Some(1)
+            },
+            value: Some(0)
+        },
+
+        Field {
+            coordinates: Point {
+                x: Some(2),
+                y: Some(0)
+            },
+            value: Some(1)
+        },
+        Field {
+            coordinates: Point {
+                x: Some(1),
+                y: Some(1)
+            },
+            value: Some(-1)
+        },
+        Field {
+            coordinates: Point {
+                x: Some(2),
+                y: Some(2)
+            },
+            value: Some(2)
+        },
+
+        Field {
+            coordinates: Point {
+                x: Some(1),
+                y: Some(2)
+            },
+            value: Some(0)
+        },
+        Field {
+            coordinates: Point {
+                x: Some(2),
+                y: Some(1)
+            },
+            value: Some(0)
+        }];
+
+        let fs_example: Vec<Field> = matrix_first_line.into_iter()
+            .chain(matrix_second_line
+                .into_iter())
+            .chain(matrix_third_line
+                .into_iter())
+            .collect();
+
+
+        let aps_example: Vec<u8> = vec![0, 2, 5, 7, 10, 14, 17, 19, 22, 24];
+
+        return (matrix_example, fs_example, aps_example);
+    }
+
     
 
     fn testing_data_no_road() -> (Vec<Vec<i8>>, Vec<Field>, Vec<u8>) {
@@ -567,6 +764,79 @@ mod tests {
             }
         );
         a_star_resolver(fs, aps, 2, start_end).unwrap();
+    }
+
+    #[test]
+    fn a_star_multi_roads_resolver_test() {
+        let (_, mut fs, aps) = testing_data_heavy_matrix_multi_end();
+        let start_end = (Field {
+            coordinates: Point {
+                x: Some(2),
+                y: Some(0)
+            },
+            value: Some(1)
+        }, vec![Field {
+                coordinates: Point {
+                    x: Some(2),
+                    y: Some(2)
+                },
+                value: Some(2)
+            },
+            Field {
+                coordinates: Point {
+                    x: Some(0),
+                    y: Some(0)
+                },
+                value: Some(2)
+            }
+        ]);
+
+        let expected_output = vec![vec![
+            Point {
+                x: Some(2),
+                y: Some(0)
+            },
+            Point {
+                x: Some(2),
+                y: Some(1)
+            },
+            Point {
+                x: Some(2),
+                y: Some(2)
+            }
+        ], 
+        vec![
+            Point {
+                x: Some(2),
+                y: Some(0)
+            },
+            Point {
+                x: Some(2),
+                y: Some(1)
+            },
+            Point {
+                x: Some(2),
+                y: Some(2)
+            },
+            Point {
+                x: Some(1),
+                y: Some(2)
+            },
+            Point {
+                x: Some(0),
+                y: Some(2)
+            },
+            Point {
+                x: Some(0),
+                y: Some(1)
+            },
+            Point {
+                x: Some(0),
+                y: Some(0)
+            }]
+        ];
+
+        assert_eq!(a_star_multi_roads_resolver(&mut fs, aps, 3, start_end).unwrap(), expected_output);
     }
 
 }

@@ -381,12 +381,36 @@ pub mod algorithms {
 
         }
 
-        // pub fn a_star_multi_roads_resolver(fs: Vec<Field>, aps: Vec<u8>, matrix_size: usize, start_end_point: (Field, Field)) -> Result<Vec<Vec<Point>>, &'static str> {
+        pub fn a_star_multi_roads_resolver(fs: &mut Vec<Field>, aps: Vec<u8>, matrix_size: usize, start_end_point: (Field, Vec<Field>)) -> Result<Vec<Vec<Point>>, &'static str> {
+            if fs.is_empty() || aps.is_empty() || matrix_size == 0 || start_end_point == (Field::new(), Vec::new()) {
+                return Err("The parameters MUST be initializes");
+            }
 
-        // }
+            let (start_point, end_points) = start_end_point;
+            let mut list_of_roads: Vec<Vec<Point>> = Vec::new();
+            
+            for end_point in end_points {
+                list_of_roads.push(a_star_resolver(fs.clone(), aps.clone(), matrix_size, (start_point, end_point))?); 
+                *fs = remove_end_point_from_aps(fs, end_point.coordinates);
+            }
+
+            return Ok(list_of_roads);
+        }
+
+        fn remove_end_point_from_aps(fs: &mut Vec<Field>, end_point: Point) -> Vec<Field> {
+            for i in 0..fs.len() {
+                let mut current_field = fs.get_mut(i).unwrap();
+                
+                if current_field.coordinates == end_point {
+                    current_field.value = Some(0);
+                }
+            }
+
+            return fs.to_vec();
+        }
 
         pub fn a_star_resolver(fs: Vec<Field>, aps: Vec<u8>, matrix_size: usize, start_end_point: (Field, Field)) -> Result<Vec<Point>, &'static str> {
-            if fs == Vec::new() || aps == Vec::new() || start_end_point == (Field::new(), Field::new()) {
+            if fs.is_empty() || aps.is_empty() || start_end_point == (Field::new(), Field::new()) {
                 return Err("The parameters MUST be initializes");
             }
 
@@ -548,6 +572,134 @@ pub mod algorithms {
                     vec![0; 5]
                 ];
                 assert_eq!(get_start_to_end_points(sample_data).unwrap(), (Point { x: Some(1), y: Some(1) }, Point { x: Some(2), y: Some(2) }));
+            }
+
+            #[test]
+            fn remove_end_point_from_aps_test() {
+                let mut fs_example: Vec<Field> = vec![
+                    Field {
+                        coordinates: Point {
+                            x: Some(0),
+                            y: Some(1)
+                        },
+                        value: Some(1)
+                    },
+                    Field {
+                        coordinates: Point {
+                            x: Some(1),
+                            y: Some(0)
+                        },
+                        value: Some(0)
+                    },
+                    Field {
+                        coordinates: Point {
+                            x: Some(0),
+                            y: Some(0)
+                        },
+                        value: Some(0)
+                    },
+                    Field {
+                        coordinates: Point {
+                            x: Some(1),
+                            y: Some(1)
+                        },
+                        value: Some(2)
+                    },
+                    Field {
+                        coordinates: Point {
+                            x: Some(1),
+                            y: Some(1)
+                        },
+                        value: Some(2)
+                    },
+                    Field {
+                        coordinates: Point {
+                            x: Some(0),
+                            y: Some(0)
+                        },
+                        value: Some(0)
+                    },
+                    Field {
+                        coordinates: Point {
+                            x: Some(1),
+                            y: Some(0)
+                        },
+                        value: Some(0)
+                    },
+                    Field {
+                        coordinates: Point {
+                            x: Some(0),
+                            y: Some(1)
+                        },
+                        value: Some(1)
+                    }
+                    
+                ];
+                let fs_expected: Vec<Field> = vec![
+                    Field {
+                        coordinates: Point {
+                            x: Some(0),
+                            y: Some(1)
+                        },
+                        value: Some(1)
+                    },
+                    Field {
+                        coordinates: Point {
+                            x: Some(1),
+                            y: Some(0)
+                        },
+                        value: Some(0)
+                    },
+                    Field {
+                        coordinates: Point {
+                            x: Some(0),
+                            y: Some(0)
+                        },
+                        value: Some(0)
+                    },
+                    Field {
+                        coordinates: Point {
+                            x: Some(1),
+                            y: Some(1)
+                        },
+                        value: Some(0)
+                    },
+                    Field {
+                        coordinates: Point {
+                            x: Some(1),
+                            y: Some(1)
+                        },
+                        value: Some(0)
+                    },
+                    Field {
+                        coordinates: Point {
+                            x: Some(0),
+                            y: Some(0)
+                        },
+                        value: Some(0)
+                    },
+                    Field {
+                        coordinates: Point {
+                            x: Some(1),
+                            y: Some(0)
+                        },
+                        value: Some(0)
+                    },
+                    Field {
+                        coordinates: Point {
+                            x: Some(0),
+                            y: Some(1)
+                        },
+                        value: Some(1)
+                    }
+                    
+                ];
+                let end_point_to_purge = Point {
+                    x: Some(1),
+                    y: Some(1)
+                };
+
+                assert_eq!(remove_end_point_from_aps(&mut fs_example, end_point_to_purge), fs_expected);
             }
 
             #[test]
