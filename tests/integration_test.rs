@@ -1,7 +1,8 @@
 #[cfg(test)]
 mod tests {
-    use esgi_arena_resolver_algorithms::algorithms::a_star::*;
-
+    use esgi_arena_resolver_algorithms::a_star::*;
+    use esgi_arena_resolver_algorithms::graph::*;
+    
     fn testing_data() -> (Vec<Vec<i8>>, Vec<Field>, Vec<u8>) {
         let matrix_example: Vec<Vec<i8>> = vec![
             vec![0, 1], 
