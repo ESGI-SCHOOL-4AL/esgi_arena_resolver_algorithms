@@ -1,4 +1,22 @@
-pub use crate::graph::{Point, Field, AStarField, get_start_to_end_points, get_start_to_end_points_multi_roads, get_element_childs_from_fs_aps, remove_end_point_from_aps};
+pub use crate::graph::{Point, Field, get_start_to_end_points, get_start_to_end_points_multi_roads, get_element_childs_from_fs_aps, remove_end_point_from_aps};
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct AStarField {
+    pub wrapped_field: Field,
+    pub parent_field: Option<Box<Self>>,
+    pub move_cost: Option<u8>
+    
+}
+
+impl AStarField {
+    pub fn new() -> Self {
+        return Self {
+            wrapped_field: Field::new(),
+            parent_field: None,
+            move_cost: None
+        };
+    }
+}
 
 /// Get heuristic value from start point to the target.
 /// 

@@ -1,22 +1,3 @@
-
-#[derive(Debug, Clone, PartialEq)]
-pub struct AStarField {
-    pub wrapped_field: Field,
-    pub parent_field: Option<Box<Self>>,
-    pub move_cost: Option<u8>
-    
-}
-
-impl AStarField {
-    pub fn new() -> Self {
-        return Self {
-            wrapped_field: Field::new(),
-            parent_field: None,
-            move_cost: None
-        };
-    }
-}
-
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Field {
     pub coordinates: Point,
