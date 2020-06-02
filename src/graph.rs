@@ -323,8 +323,6 @@ pub fn get_element_childs_from_fs_aps(fs: Vec<Field>, aps: Vec<u8>, index: usize
     let fs_start_index = aps.get(index).unwrap().clone() as usize;
     let fs_end_index = aps.get(index + 1).unwrap().clone() as usize;
 
-    println!("start: {}, end: {}", fs_start_index, fs_end_index);
-
     return Ok(fs.iter()
         .enumerate()
         .filter(|(index, _)| index >= &fs_start_index && index < &fs_end_index)
