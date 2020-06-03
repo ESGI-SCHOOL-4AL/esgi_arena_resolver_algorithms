@@ -1,53 +1,23 @@
 pub use crate::graph::{Field, Point, get_element_childs_from_fs_aps};
 
-fn dfs_fs_aps(fs: Vec<Field>, aps: Vec<u8>, start: Field, matrix_size: usize) -> Vec<Vec<Field>> {
-    let mut to_show: Vec<Vec<Field>> = Vec::new();
-    let mut discover: Vec<Field> = Vec::new();
-    let mut undiscover: Vec<Field> = vec![start];
-
-    while ! undiscover.is_empty() {
-        let current_field = undiscover.pop().unwrap();
-        let mut is_discover = false;
-        let mut current_path: Vec<Field> = Vec::new();
-
-        for discover_field in &discover {
-            if current_field == *discover_field {
-                is_discover = true;
-            }
-        }
-
-        if ! is_discover {
-            discover.push(current_field);
-            current_path.push(current_field);
-
-            let current_field_childs = get_element_childs_from_fs_aps(fs.clone(), aps.clone(), current_field.coordinates.get_index(matrix_size).unwrap());
-            for child in current_field_childs.unwrap() {
-                undiscover.push(child);
-            }
-        }
-    }
-
-    return to_show;
-
-}
-
-fn dfs_fs_aps_recursive(fs: Vec<Field>, aps: Vec<u8>, start_end: (Field, Field), matrix_size: usize, discovered: &mut Vec<Field>, current_path: &mut Vec<Field>) {
+pub fn dfs_fs_aps_recursive(fs: Vec<Field>, aps: Vec<u8>, start_end: (Field, Field), matrix_size: usize, discovered: &mut Vec<Field>, current_path: &mut Vec<Field>, all_path: &mut Vec<Vec<Field>>) {
     let (start, end) = start_end;
     discovered.push(start);
 
     let current_field_discover_index = discovered.len() - 1;
 
     if start == end {
-        for element in current_path.clone() {
-            println!("len, {}, element path: {:?}", current_path.len(), element);
-        }
-        println!();
+        all_path.push(current_path.to_owned());
         return;
     }
 
     for child in get_element_childs_from_fs_aps(fs.clone(), aps.clone(), start.coordinates.get_index(matrix_size).unwrap()).unwrap() {
         let mut is_discover = false;
         
+        if child.value.unwrap() == -1 {
+            continue;
+        }
+
         for discovered_field in discovered.to_owned() {
             if discovered_field == child {
                 is_discover = true;
@@ -60,7 +30,7 @@ fn dfs_fs_aps_recursive(fs: Vec<Field>, aps: Vec<u8>, start_end: (Field, Field),
 
         current_path.push(child);
         let current_field_index_path = current_path.len() - 1;
-        dfs_fs_aps_recursive(fs.clone(), aps.clone(), (child, end), matrix_size, &mut discovered.clone(), &mut current_path.clone());
+        dfs_fs_aps_recursive(fs.clone(), aps.clone(), (child, end), matrix_size, &mut discovered.clone(), &mut current_path.clone(), all_path);
         current_path.remove(current_field_index_path);
     }
 
@@ -71,81 +41,202 @@ fn dfs_fs_aps_recursive(fs: Vec<Field>, aps: Vec<u8>, start_end: (Field, Field),
 #[cfg(test)]
 mod test {
     use super::*;
-    #[test]
-    fn dfs_fs_aps_test() {
-        let fs_example: Vec<Field> = vec![
-            Field {
-                coordinates: Point {
-                    x: Some(0),
-                    y: Some(1)
-                },
-                value: Some(1)
-            },
-            Field {
-                coordinates: Point {
-                    x: Some(1),
-                    y: Some(0)
-                },
-                value: Some(0)
-            },
-            Field {
-                coordinates: Point {
-                    x: Some(0),
-                    y: Some(0)
-                },
-                value: Some(0)
-            },
-            Field {
-                coordinates: Point {
-                    x: Some(1),
-                    y: Some(1)
-                },
-                value: Some(2)
-            },
-            Field {
-                coordinates: Point {
-                    x: Some(1),
-                    y: Some(1)
-                },
-                value: Some(2)
-            },
-            Field {
-                coordinates: Point {
-                    x: Some(0),
-                    y: Some(0)
-                },
-                value: Some(0)
-            },
-            Field {
-                coordinates: Point {
-                    x: Some(1),
-                    y: Some(0)
-                },
-                value: Some(0)
-            },
-            Field {
-                coordinates: Point {
-                    x: Some(0),
-                    y: Some(1)
-                },
-                value: Some(1)
-            }
-        
+
+    fn testing_data_heavy_matrix() -> (Vec<Vec<i8>>, Vec<Field>, Vec<u8>) {
+        let matrix_example: Vec<Vec<i8>> = vec![
+            vec![2, 0, 0], 
+            vec![-1, -1, 0],
+            vec![1, 0, 0]
         ];
-        let aps_example: Vec<u8> = vec![0, 2, 4, 6, 8];
-        let start_field_example = Field {
+
+        let matrix_first_line = vec![Field {
             coordinates: Point {
                 x: Some(0),
                 y: Some(1)
             },
+            value: Some(0)
+        },
+        Field {
+            coordinates: Point {
+                x: Some(1),
+                y: Some(0)
+            },
+            value: Some(-1)
+        },
+
+        Field {
+            coordinates: Point {
+                x: Some(0),
+                y: Some(0)
+            },
+            value: Some(2)
+        },
+        Field {
+            coordinates: Point {
+                x: Some(0),
+                y: Some(2)
+            },
+            value: Some(0)
+        },
+        Field {
+            coordinates: Point {
+                x: Some(1),
+                y: Some(1)
+            },
+            value: Some(-1)
+        },
+
+        Field {
+            coordinates: Point {
+                x: Some(0),
+                y: Some(1)
+            },
+            value: Some(0)
+        },
+        Field {
+            coordinates: Point {
+                x: Some(1),
+                y: Some(2)
+            },
+            value: Some(0)
+        }];
+
+        let matrix_second_line = vec![Field {
+            coordinates: Point {
+                x: Some(0),
+                y: Some(0)
+            },
+            value: Some(2)
+        },
+        Field {
+            coordinates: Point {
+                x: Some(2),
+                y: Some(0)
+            },
             value: Some(1)
-        };
+        },
+        Field {
+            coordinates: Point {
+                x: Some(1),
+                y: Some(1)
+            },
+            value: Some(-1)
+        },
 
-        for element in dfs_fs_aps(fs_example, aps_example, start_field_example, 2) {
-            println!("{:?}", element);
-        }
+        Field {
+            coordinates: Point {
+                x: Some(0),
+                y: Some(1)
+            },
+            value: Some(0)
+        },
+        Field {
+            coordinates: Point {
+                x: Some(1),
+                y: Some(0)
+            },
+            value: Some(-1)
+        },
+        Field {
+            coordinates: Point {
+                x: Some(1),
+                y: Some(2)
+            },
+            value: Some(0)
+        },
+        Field {
+            coordinates: Point {
+                x: Some(2),
+                y: Some(1)
+            },
+            value: Some(0)
+        },
 
-        assert_eq!(2, 4);
+        Field {
+            coordinates: Point {
+                x: Some(0),
+                y: Some(2)
+            },
+            value: Some(0)
+        },
+        Field {
+            coordinates: Point {
+                x: Some(1),
+                y: Some(1)
+            },
+            value: Some(-1)
+        },
+        Field {
+            coordinates: Point {
+                x: Some(2),
+                y: Some(2)
+            },
+            value: Some(0)
+        }];
+
+        let matrix_third_line = vec![Field {
+            coordinates: Point {
+                x: Some(1),
+                y: Some(0)
+            },
+            value: Some(-1)
+        },
+        Field {
+            coordinates: Point {
+                x: Some(2),
+                y: Some(1)
+            },
+            value: Some(0)
+        },
+
+        Field {
+            coordinates: Point {
+                x: Some(2),
+                y: Some(0)
+            },
+            value: Some(1)
+        },
+        Field {
+            coordinates: Point {
+                x: Some(1),
+                y: Some(1)
+            },
+            value: Some(-1)
+        },
+        Field {
+            coordinates: Point {
+                x: Some(2),
+                y: Some(2)
+            },
+            value: Some(0)
+        },
+
+        Field {
+            coordinates: Point {
+                x: Some(1),
+                y: Some(2)
+            },
+            value: Some(0)
+        },
+        Field {
+            coordinates: Point {
+                x: Some(2),
+                y: Some(1)
+            },
+            value: Some(0)
+        }];
+
+        let fs_example: Vec<Field> = matrix_first_line.into_iter()
+            .chain(matrix_second_line
+                .into_iter())
+            .chain(matrix_third_line
+                .into_iter())
+            .collect();
+
+
+        let aps_example: Vec<u8> = vec![0, 2, 5, 7, 10, 14, 17, 19, 22, 24];
+
+        return (matrix_example, fs_example, aps_example);
     }
 
     #[test]
@@ -210,6 +301,7 @@ mod test {
         
         ];
         let aps_example: Vec<u8> = vec![0, 2, 4, 6, 8];
+
         let start_field_example = Field {
             coordinates: Point {
                 x: Some(0),
@@ -224,10 +316,60 @@ mod test {
             },
             value: Some(2)
         };
+        let expected_output = vec![vec![Field { coordinates: Point { x: Some(0), y: Some(1) }, value: Some(1) },
+        Field { coordinates: Point { x: Some(0), y: Some(0) }, value: Some(0) },
+        Field { coordinates: Point { x: Some(1), y: Some(0) }, value: Some(0) },
+        Field { coordinates: Point { x: Some(1), y: Some(1) }, value: Some(2) }
+        ],
+        vec![Field { coordinates: Point { x: Some(0), y: Some(1) }, value: Some(1) },
+        Field { coordinates: Point { x: Some(1), y: Some(1) }, value: Some(2) }
+        ]];
+        
 
-        dfs_fs_aps_recursive(fs_example, aps_example, (start_field_example, end_field_example), 2, &mut Vec::new(), &mut vec![start_field_example]);
+        let mut all_path: Vec<Vec<Field>> = Vec::new();
 
-        assert_eq!(2, 4);
+        dfs_fs_aps_recursive(fs_example, aps_example, (start_field_example, end_field_example), 2, &mut Vec::new(), &mut vec![start_field_example], &mut all_path);
+
+        assert_eq!(all_path, expected_output);
         
     }
+
+    #[test]
+    fn dfs_fs_aps_recursive_heavy_test() {
+        let (_, fs_example, aps_example) = testing_data_heavy_matrix();
+
+        let start_end = (
+            Field {
+                coordinates: Point {
+                    x: Some(2),
+                    y: Some(0)
+                },
+                value: Some(1)
+            },
+            Field {
+                coordinates: Point{
+                    x: Some(0),
+                    y: Some(0)
+                },
+                value: Some(2)
+            }
+        );
+
+        let expected_output = vec![vec![Field { coordinates: Point { x: Some(2), y: Some(0) }, value: Some(1) },
+        Field { coordinates: Point { x: Some(2), y: Some(1) }, value: Some(0) },
+        Field { coordinates: Point { x: Some(2), y: Some(2) }, value: Some(0) },
+        Field { coordinates: Point { x: Some(1), y: Some(2) }, value: Some(0) },
+        Field { coordinates: Point { x: Some(0), y: Some(2) }, value: Some(0) },
+        Field { coordinates: Point { x: Some(0), y: Some(1) }, value: Some(0) },
+        Field { coordinates: Point { x: Some(0), y: Some(0) }, value: Some(2) }]];
+        
+        let mut all_path: Vec<Vec<Field>> = Vec::new();
+
+        dfs_fs_aps_recursive(fs_example, aps_example, start_end, 3, &mut Vec::new(), &mut vec![start_end.0], &mut all_path);
+
+        assert_eq!(all_path, expected_output);
+        
+    }
+
+
 }
