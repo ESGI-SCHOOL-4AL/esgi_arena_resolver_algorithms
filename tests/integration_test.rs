@@ -2,6 +2,7 @@
 mod tests {
     use esgi_arena_resolver_algorithms::a_star::*;
     use esgi_arena_resolver_algorithms::graph::*;
+    use esgi_arena_resolver_algorithms::chinese_rings::*;
     
     fn testing_data() -> (Vec<Vec<i8>>, Vec<Field>, Vec<u8>) {
         let matrix_example: Vec<Vec<i8>> = vec![
@@ -838,6 +839,26 @@ mod tests {
         ];
 
         assert_eq!(a_star_multi_roads_resolver(&mut fs, aps, 3, start_end).unwrap(), expected_output);
+    }
+
+    #[test]
+    fn chinese_rings_resolver_test() {
+        let size: usize = 4;
+        let expected_output = vec![
+            vec![false, false, false, false],
+            vec![true, false, false, false],
+            vec![true, true, false, false],
+            vec![false, true, false, false],
+            vec![false, true, true, false],
+            vec![true, true, true, false],
+            vec![true, false, true, false],
+            vec![false, false, true, false],
+            vec![false, false, true, true],
+            vec![true, false, true, true],
+            vec![true, true, true, true]
+        ];
+
+        assert_eq!(chinese_rings_resolver(size), expected_output);
     }
 
 }
