@@ -1,7 +1,4 @@
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
-    }
-}
+pub mod graph;
+pub mod a_star;
+pub mod dfs;
+pub mod chinese_rings;
