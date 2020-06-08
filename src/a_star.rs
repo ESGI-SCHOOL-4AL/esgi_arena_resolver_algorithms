@@ -1,5 +1,11 @@
+//! # Description
+//! This the A* algorithme module. 
+
 pub use crate::graph::{Point, Field, get_start_to_end_points, get_start_to_end_points_multi_roads, get_element_childs_from_fs_aps, remove_end_point_from_aps};
 
+/// Struct for handle A* algotithm interaction.
+/// It's compose of the target field, the parent field and the sum between the heuristic 
+/// and the cost to move on the target field.
 #[derive(Debug, Clone, PartialEq)]
 pub struct AStarField {
     pub wrapped_field: Field,
