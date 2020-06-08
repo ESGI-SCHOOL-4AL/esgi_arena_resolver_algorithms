@@ -1,11 +1,44 @@
 //! # Description
-//! This the A* algorithme module. 
+//! This the A* algorithme module.
+//! [For more explainations](https://xlinux.nist.gov/dads//HTML/manhattanDistance.html)
 
 pub use crate::graph::{Point, Field, get_start_to_end_points, get_start_to_end_points_multi_roads, get_element_childs_from_fs_aps, remove_end_point_from_aps};
 
 /// Struct for handle A* algotithm interaction.
 /// It's compose of the target field, the parent field and the sum between the heuristic 
 /// and the cost to move on the target field.
+/// 
+/// # Example
+/// 
+/// ```
+/// use esgi_arena_resolver_algorithms::a_star::AStarField;
+/// use esgi_arena_resolver_algorithms::graph::{ Point, Field };
+/// 
+/// let mut a_star_example = AStarField::new();
+/// 
+/// a_star_example.wrapped_field = Field {
+///     coordinates: Point {
+///         x: Some(1),
+///         y: Some(0)
+///     },
+///     value: Some(0)
+/// };
+/// 
+/// a_star_example.parent_field = Some(Box::new(AStarField { 
+///     wrapped_field: Field {
+///             coordinates: Point {
+///                 x: Some(0),
+///                 y: Some(0)
+///             },
+///             value: Some(1)
+///     },
+///     parent_field: None,
+///     move_cost: Some(9)
+/// 
+/// }));
+/// 
+/// a_star_example.move_cost = Some(10);
+/// ```
 #[derive(Debug, Clone, PartialEq)]
 pub struct AStarField {
     pub wrapped_field: Field,
@@ -68,6 +101,109 @@ pub fn a_star_multi_roads_resolver(fs: &mut Vec<Field>, aps: Vec<u8>, matrix_siz
     return Ok(list_of_roads);
 }
 
+/// A* resolver function.
+/// It's find the shorter path between two points of a graph.
+/// 
+/// [For more explainations](https://en.wikipedia.org/wiki/A*_search_algorithm)
+/// 
+/// # Example
+/// 
+/// ```
+/// use esgi_arena_resolver_algorithms::graph::{ Point, Field };
+/// use esgi_arena_resolver_algorithms::a_star::a_star_resolver;
+/// 
+/// let matrix_example: Vec<Vec<i8>> = vec![
+/// vec![0, 1], 
+/// vec![0, 2]
+/// ];
+
+/// let fs_example: Vec<Field> = vec![
+/// Field {
+///     coordinates: Point {
+///         x: Some(0),
+///         y: Some(1)
+///     },
+///     value: Some(1)
+/// },
+/// Field {
+///     coordinates: Point {
+///         x: Some(1),
+///         y: Some(0)
+///     },
+///     value: Some(0)
+/// },
+/// Field {
+///     coordinates: Point {
+///         x: Some(0),
+///         y: Some(0)
+///     },
+///     value: Some(0)
+/// },
+/// Field {
+///     coordinates: Point {
+///         x: Some(1),
+///         y: Some(1)
+///     },
+///     value: Some(2)
+/// },
+/// Field {
+///     coordinates: Point {
+///         x: Some(1),
+///         y: Some(1)
+///     },
+///     value: Some(2)
+/// },
+/// Field {
+///     coordinates: Point {
+///         x: Some(0),
+///         y: Some(0)
+///     },
+///     value: Some(0)
+/// },
+/// Field {
+///     coordinates: Point {
+///         x: Some(1),
+///         y: Some(0)
+///     },
+///     value: Some(0)
+/// },
+/// Field {
+///     coordinates: Point {
+///         x: Some(0),
+///         y: Some(1)
+///     },
+///     value: Some(1)
+/// }
+/// ];
+
+/// let aps_example: Vec<u8> = vec![0, 2, 4, 6, 8];
+/// let start_end_fields = (Field {
+///     coordinates: Point {
+///         x: Some(0),
+///         y: Some(1)
+///     },
+///     value: Some(1)
+///     },
+///     Field {
+///         coordinates: Point {
+///             x: Some(1),
+///             y: Some(1)
+///         },
+///         value: Some(2)
+///     }
+/// );
+/// 
+/// assert_eq!(a_star_resolver(fs_example, aps_example, matrix_example.len(), start_end_fields).unwrap(), vec![
+///     Point {
+///         x: Some(0),
+///         y: Some(1)
+///     },
+///     Point {
+///         x: Some(1),
+///         y: Some(1)
+///     }
+/// ]);
+/// ```
 pub fn a_star_resolver(fs: Vec<Field>, aps: Vec<u8>, matrix_size: usize, start_end_point: (Field, Field)) -> Result<Vec<Point>, &'static str> {
     if fs.is_empty() || aps.is_empty() || start_end_point == (Field::new(), Field::new()) {
         return Err("The parameters MUST be initializes");

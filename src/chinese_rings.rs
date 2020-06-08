@@ -1,3 +1,31 @@
+//! # Description
+//! This is the chinese rings handler module.
+//! [For more explainations](https://en.wikipedia.org/wiki/Baguenaudier)
+
+/// Get all necessary movements for define chinese rings game.
+/// 
+/// # Exemple
+/// 
+/// ```
+/// use esgi_arena_resolver_algorithms::chinese_rings::chinese_rings_resolver;
+/// 
+/// let size: usize = 4;
+/// let expected_output = vec![
+///     vec![false, false, false, false],
+///     vec![true, false, false, false],
+///     vec![true, true, false, false],
+///     vec![false, true, false, false],
+///     vec![false, true, true, false],
+///     vec![true, true, true, false],
+///     vec![true, false, true, false],
+///     vec![false, false, true, false],
+///     vec![false, false, true, true],
+///     vec![true, false, true, true],
+///     vec![true, true, true, true]
+/// ];
+
+/// assert_eq!(chinese_rings_resolver(size), expected_output);
+/// ```
 pub fn chinese_rings_resolver(rings_number: usize) -> Vec<Vec<bool>> {
     let mut chinese_rings: Vec<bool> = Vec::with_capacity(rings_number);
     for _ in 0..rings_number + 1 {

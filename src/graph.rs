@@ -22,14 +22,6 @@
 /// };
 /// 
 /// field_example.value = Some(0);
-/// 
-/// assert_eq!(field_example, Field {
-///     coordinates: Point {
-///         x: Some(0),
-///         y: Some(0)
-///     },
-///     value: Some(0)
-/// });
 /// ```
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Field {

@@ -687,7 +687,7 @@ mod tests {
                 y: Some(1)
             },
             value: Some(2)
-        },);
+        });
 
         assert_eq!(a_star_resolver(fs, aps, 2, start_end).unwrap(), expected_output);
     }
