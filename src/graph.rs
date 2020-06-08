@@ -1,3 +1,28 @@
+//! # Description 
+//! This is the graph structure handling module.
+//! It's used for handle input matric and convert it into graph struct.
+//! The graph struct used is a FS APS.
+//! FS is a list of sons of all nodes of the structure.
+//! APS contain the index range of each node sons.
+
+/// Field is a organisational structure.
+/// It's use for group x and y index from the matrix and the matrix field value.
+/// For be simple it's a logical representation of each field of the matrix.
+/// 
+/// # Example
+/// 
+/// ```
+/// use esgi_arena_resolver_algorithms::graph::{ Point, Field };
+/// 
+/// let mut field_example = Field::new();
+/// 
+/// field_example.coordinates = Point {
+///     x: Some(0),
+///     y: Some(0)
+/// };
+/// 
+/// field_example.value = Some(0);
+/// ```
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Field {
     pub coordinates: Point,
@@ -14,6 +39,8 @@ impl Field {
     }
 }
 
+/// Point is a organisational structure.
+/// It's use group x and y index from the matrix.
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Point {
     pub x: Option<usize>,
@@ -27,7 +54,22 @@ impl Point {
             y: None
         };
     }
-
+    
+    /// Use for get the index value in the case where the matrix is flatten.
+    /// 
+    /// # Example
+    /// 
+    /// ```
+    /// use esgi_arena_resolver_algorithms::graph::Point;
+    /// 
+    /// let matrix_size: usize = 5;
+    /// let point_test = Point {
+    ///     x: Some(1),
+    ///     y: Some(2)
+    /// };
+    /// 
+    /// assert_eq!(point_test.get_index(matrix_size).unwrap(), 7);
+    /// ```
     pub fn get_index(&self, matrix_size: usize) -> Result<usize, &'static str> {
         if self.x.is_none() || self.y.is_none() || matrix_size == 0 {
             return Err("The x and y must be declare for get a index");
@@ -55,6 +97,35 @@ fn bord_is_well_form(matrix_bord: &[Vec<i8>]) -> Option<&'static str> {
     return None;
 }
 
+/// This function return the start point and the end point of a bord from a matrix.
+/// The field value for the start is 1 and for the end is 2.
+/// The matrix MUST be a square (same size for height and weight).
+/// 
+/// # Example
+/// 
+/// ```
+/// use esgi_arena_resolver_algorithms::graph::{ get_start_to_end_points, Point };
+/// 
+/// let matrix = vec![
+///     vec![2, 0, 0, 0, 0],
+///     vec![-1, -1, 0, 0, 0],
+///     vec![-1, 0, 0, 0, -1],
+///     vec![0, 0, 0, 0, 0],
+///     vec![0, 1, 0, 0, 0]
+/// ];
+/// let (start, end) = get_start_to_end_points(matrix).unwrap();
+/// 
+/// assert_eq!(start, Point {
+///         x: Some(4),
+///         y: Some(1)
+///     }
+/// );
+/// assert_eq!(end, Point {
+///         x: Some(0),
+///         y: Some(0)
+///     }
+/// );
+/// ```
 pub fn get_start_to_end_points(matrix_bord: Vec<Vec<i8>>) -> Result<(Point, Point), &'static str> {
     let matrix_ligne_number = matrix_bord.len();
     let mut result_points: (Point, Point) = (Point::new(), Point::new());
@@ -94,6 +165,40 @@ pub fn get_start_to_end_points(matrix_bord: Vec<Vec<i8>>) -> Result<(Point, Poin
     return Ok(result_points);
 }
 
+/// This function return the start point and the end point of a bord from a matrix.
+/// The field value for the start is 1 and for the end is 2.
+/// The matrix MUST be a square (same size for height and weight).
+/// 
+/// # Example
+/// 
+/// ```
+/// use esgi_arena_resolver_algorithms::graph::{ get_start_to_end_points_multi_roads, Point };
+/// 
+/// let matrix = vec![
+///     vec![2, 0, 0, 0, 0],
+///     vec![-1, -1, 0, 0, 2],
+///     vec![-1, 0, 0, 0, -1],
+///     vec![0, 0, 0, 0, 0],
+///     vec![0, 1, 0, 0, 0]
+/// ];
+/// let (start, end) = get_start_to_end_points_multi_roads(matrix).unwrap();
+/// 
+/// assert_eq!(start, Point {
+///         x: Some(4),
+///         y: Some(1)
+///     }
+/// );
+/// assert_eq!(end, vec![Point {
+///         x: Some(0),
+///         y: Some(0)
+///     },
+///     Point {
+///         x: Some(1),
+///         y: Some(4)
+///     }
+///     ]
+/// );
+/// ```
 pub fn get_start_to_end_points_multi_roads(matrix_bord: Vec<Vec<i8>>) -> Result<(Point, Vec<Point>), &'static str> {
     let matrix_ligne_number = matrix_bord.len();
     let mut result_points: (Point, Vec<Point>) = (Point::new(), Vec::new());
@@ -138,9 +243,7 @@ pub fn get_start_to_end_points_multi_roads(matrix_bord: Vec<Vec<i8>>) -> Result<
 /// # Example
 /// 
 /// ```
-/// use esgi_arena_resolver_algorithms::graph::Point;
-/// use esgi_arena_resolver_algorithms::graph::Field;
-/// use esgi_arena_resolver_algorithms::graph::fs_aps_from_matrix;
+/// use esgi_arena_resolver_algorithms::graph::{ Point, Field, fs_aps_from_matrix };
 ///
 /// let sample_data: Vec<Vec<i8>> = vec![
 ///     vec![0, 1], 
@@ -276,6 +379,34 @@ pub fn fs_aps_from_matrix(matrix: Vec<Vec<i8>>) -> Result<(Vec<Field>, Vec<u8>),
     return Ok((fs, aps));
 }
 
+/// Generate a Field from a matrix and a Point as index value.
+/// The matrix MUST be a square (same size for height and weight).
+/// 
+/// # Example
+/// 
+/// ```
+/// use esgi_arena_resolver_algorithms::graph::{ Point, Field, get_field_by_index };
+/// 
+/// let matrix = vec![
+///     vec![2, 0, 0, 0, 0],
+///     vec![-1, -1, 0, 0, 0],
+///     vec![-1, 0, 0, 0, -1],
+///     vec![0, 0, 0, 0, 0],
+///     vec![0, 1, 0, 0, 0]
+/// ];
+/// let point_to_extract = Point {
+///     x: Some(2),
+///     y: Some(0)
+/// };
+/// 
+/// assert_eq!(get_field_by_index(matrix, point_to_extract).unwrap(), Field {
+///     coordinates: Point {
+///         x: Some(2),
+///         y: Some(0)
+///     },
+///     value: Some(-1)
+/// });
+/// ```
 pub fn get_field_by_index(matrix_bord: Vec<Vec<i8>>, index: Point) -> Result<Field, &'static str> {
     let matrix_ligne_number = matrix_bord.len();
 
@@ -315,6 +446,96 @@ pub fn get_field_by_index(matrix_bord: Vec<Vec<i8>>, index: Point) -> Result<Fie
     return Ok(result_field);
 }
 
+/// Get all childs from a target element.
+/// The target element is pointed with his index.
+///
+/// # Example
+///
+/// ```
+/// use esgi_arena_resolver_algorithms::graph::{ Point, Field, get_element_childs_from_fs_aps };
+/// 
+/// let sample_data: Vec<Vec<i8>> = vec![
+///     vec![0, 1], 
+///     vec![0, 2]
+/// ];
+/// let sample_fs = vec![
+///     Field {
+///         coordinates: Point {
+///             x: Some(0),
+///             y: Some(1)
+///         },
+///         value: Some(1)
+///      },
+///      Field {
+///         coordinates: Point {
+///             x: Some(1),
+///             y: Some(0)
+///         },
+///         value: Some(0)
+///      },
+///      Field {
+///         coordinates: Point {
+///             x: Some(0),
+///             y: Some(0)
+///         },
+///         value: Some(0)
+///      },
+///      Field {
+///         coordinates: Point {
+///             x: Some(1),
+///             y: Some(1)
+///         },
+///         value: Some(2)
+///      },
+///      Field {
+///         coordinates: Point {
+///             x: Some(1),
+///             y: Some(1)
+///         },
+///         value: Some(2)
+///      },
+///      Field {
+///         coordinates: Point {
+///             x: Some(0),
+///             y: Some(0)
+///         },
+///         value: Some(0)
+///      },
+///      Field {
+///         coordinates: Point {
+///             x: Some(1),
+///             y: Some(0)
+///         },
+///         value: Some(0)
+///      },
+///      Field {
+///         coordinates: Point {
+///             x: Some(0),
+///             y: Some(1)
+///         },
+///         value: Some(1)
+///      } 
+/// ];
+/// let sample_aps = vec![0, 2, 4, 6, 8];
+/// 
+/// 
+/// assert_eq!(get_element_childs_from_fs_aps(sample_fs, sample_aps, 0).unwrap(), vec![
+///      Field {
+///         coordinates: Point {
+///             x: Some(0),
+///             y: Some(1)
+///         },
+///         value: Some(1)
+///      },
+///      Field {
+///         coordinates: Point {
+///             x: Some(1),
+///             y: Some(0)
+///         },
+///         value: Some(0)
+///      },
+/// ]);
+/// ```
 pub fn get_element_childs_from_fs_aps(fs: Vec<Field>, aps: Vec<u8>, index: usize) -> Result<Vec<Field>, &'static str> {
     if index >= aps.len() {
         return Err("The index cannot be bigger than the size of APS vector");
@@ -331,6 +552,144 @@ pub fn get_element_childs_from_fs_aps(fs: Vec<Field>, aps: Vec<u8>, index: usize
 
 }
 
+/// Remove a target end point from a aps.
+/// The remove only change the value of the Field to 0.
+/// 
+/// # Example
+/// 
+/// ```
+/// use esgi_arena_resolver_algorithms::graph::{ Point, Field, remove_end_point_from_aps };
+/// 
+/// let sample_data: Vec<Vec<i8>> = vec![
+///     vec![0, 1], 
+///     vec![0, 2]
+/// ];
+/// let mut sample_fs = vec![
+///     Field {
+///         coordinates: Point {
+///             x: Some(0),
+///             y: Some(1)
+///         },
+///         value: Some(1)
+///      },
+///      Field {
+///         coordinates: Point {
+///             x: Some(1),
+///             y: Some(0)
+///         },
+///         value: Some(0)
+///      },
+///      Field {
+///         coordinates: Point {
+///             x: Some(0),
+///             y: Some(0)
+///         },
+///         value: Some(0)
+///      },
+///      Field {
+///         coordinates: Point {
+///             x: Some(1),
+///             y: Some(1)
+///         },
+///         value: Some(2)
+///      },
+///      Field {
+///         coordinates: Point {
+///             x: Some(1),
+///             y: Some(1)
+///         },
+///         value: Some(2)
+///      },
+///      Field {
+///         coordinates: Point {
+///             x: Some(0),
+///             y: Some(0)
+///         },
+///         value: Some(0)
+///      },
+///      Field {
+///         coordinates: Point {
+///             x: Some(1),
+///             y: Some(0)
+///         },
+///         value: Some(0)
+///      },
+///      Field {
+///         coordinates: Point {
+///             x: Some(0),
+///             y: Some(1)
+///         },
+///         value: Some(1)
+///      } 
+/// ];
+/// 
+/// let expected_fs = vec![
+///     Field {
+///         coordinates: Point {
+///             x: Some(0),
+///             y: Some(1)
+///         },
+///         value: Some(1)
+///      },
+///      Field {
+///         coordinates: Point {
+///             x: Some(1),
+///             y: Some(0)
+///         },
+///         value: Some(0)
+///      },
+///      Field {
+///         coordinates: Point {
+///             x: Some(0),
+///             y: Some(0)
+///         },
+///         value: Some(0)
+///      },
+///      Field {
+///         coordinates: Point {
+///             x: Some(1),
+///             y: Some(1)
+///         },
+///         value: Some(0)
+///      },
+///      Field {
+///         coordinates: Point {
+///             x: Some(1),
+///             y: Some(1)
+///         },
+///         value: Some(0)
+///      },
+///      Field {
+///         coordinates: Point {
+///             x: Some(0),
+///             y: Some(0)
+///         },
+///         value: Some(0)
+///      },
+///      Field {
+///         coordinates: Point {
+///             x: Some(1),
+///             y: Some(0)
+///         },
+///         value: Some(0)
+///      },
+///      Field {
+///         coordinates: Point {
+///             x: Some(0),
+///             y: Some(1)
+///         },
+///         value: Some(1)
+///      } 
+/// ];
+/// let end_point_to_remove = Point {
+///     x: Some(1),
+///     y: Some(1)
+/// };
+/// 
+/// remove_end_point_from_aps(&mut sample_fs, end_point_to_remove);
+/// 
+/// assert_eq!(sample_fs, expected_fs);
+/// ```
 pub fn remove_end_point_from_aps(fs: &mut Vec<Field>, end_point: Point) -> Vec<Field> {
     for i in 0..fs.len() {
         let mut current_field = fs.get_mut(i).unwrap();
