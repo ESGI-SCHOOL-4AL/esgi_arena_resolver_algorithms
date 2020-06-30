@@ -71,7 +71,7 @@ pub use crate::graph::{Field, Point, get_element_childs_from_fs_aps};
 ///     value: Some(1)
 /// }
 /// ];
-/// let aps_example: Vec<u8> = vec![0, 2, 4, 6, 8];
+/// let aps_example: Vec<u32> = vec![0, 2, 4, 6, 8];
 /// 
 /// let start_field_example = Field {
 /// coordinates: Point {
@@ -102,7 +102,7 @@ pub use crate::graph::{Field, Point, get_element_childs_from_fs_aps};
 /// 
 /// assert_eq!(all_path, expected_output);
 /// ```
-pub fn dfs_fs_aps_recursive(fs: Vec<Field>, aps: Vec<u8>, start_end: (Field, Field), matrix_size: usize, discovered: &mut Vec<Field>, current_path: &mut Vec<Field>, all_path: &mut Vec<Vec<Field>>) {
+pub fn dfs_fs_aps_recursive(fs: Vec<Field>, aps: Vec<u32>, start_end: (Field, Field), matrix_size: usize, discovered: &mut Vec<Field>, current_path: &mut Vec<Field>, all_path: &mut Vec<Vec<Field>>) {
     let (start, end) = start_end;
     discovered.push(start);
 
@@ -144,7 +144,7 @@ pub fn dfs_fs_aps_recursive(fs: Vec<Field>, aps: Vec<u8>, start_end: (Field, Fie
 mod test {
     use super::*;
 
-    fn testing_data_heavy_matrix() -> (Vec<Vec<i8>>, Vec<Field>, Vec<u8>) {
+    fn testing_data_heavy_matrix() -> (Vec<Vec<i8>>, Vec<Field>, Vec<u32>) {
         let matrix_example: Vec<Vec<i8>> = vec![
             vec![2, 0, 0], 
             vec![-1, -1, 0],
@@ -336,7 +336,7 @@ mod test {
             .collect();
 
 
-        let aps_example: Vec<u8> = vec![0, 2, 5, 7, 10, 14, 17, 19, 22, 24];
+        let aps_example: Vec<u32> = vec![0, 2, 5, 7, 10, 14, 17, 19, 22, 24];
 
         return (matrix_example, fs_example, aps_example);
     }
@@ -402,7 +402,7 @@ mod test {
             }
         
         ];
-        let aps_example: Vec<u8> = vec![0, 2, 4, 6, 8];
+        let aps_example: Vec<u32> = vec![0, 2, 4, 6, 8];
 
         let start_field_example = Field {
             coordinates: Point {

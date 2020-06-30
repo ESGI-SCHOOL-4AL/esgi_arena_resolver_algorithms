@@ -310,7 +310,7 @@ pub fn get_start_to_end_points_multi_roads(matrix_bord: Vec<Vec<i8>>) -> Result<
 /// let expect_aps = vec![0, 2, 4, 6, 8];
 /// assert_eq!(fs_aps_from_matrix(sample_data).unwrap(), (expect_fs, expect_aps));
 /// ```
-pub fn fs_aps_from_matrix(matrix: Vec<Vec<i8>>) -> Result<(Vec<Field>, Vec<u8>), &'static str> {
+pub fn fs_aps_from_matrix(matrix: Vec<Vec<i8>>) -> Result<(Vec<Field>, Vec<u32>), &'static str> {
     let message_option = bord_is_well_form(matrix.as_slice());
 
     if message_option.is_some() {
@@ -318,11 +318,11 @@ pub fn fs_aps_from_matrix(matrix: Vec<Vec<i8>>) -> Result<(Vec<Field>, Vec<u8>),
     }
 
     let mut fs: Vec<Field> = Vec::new();
-    let mut aps: Vec<u8> = vec![0];
+    let mut aps: Vec<u32> = vec![0];
 
     for line_index in 0..matrix.len() {
         for index in 0..matrix.len() {
-            let mut current_aps_index: u8 = 0;
+            let mut current_aps_index: u32 = 0;
 
             if index as i8 - 1 >= 0 {
                 fs.push(Field {
@@ -536,7 +536,7 @@ pub fn get_field_by_index(matrix_bord: Vec<Vec<i8>>, index: Point) -> Result<Fie
 ///      },
 /// ]);
 /// ```
-pub fn get_element_childs_from_fs_aps(fs: Vec<Field>, aps: Vec<u8>, index: usize) -> Result<Vec<Field>, &'static str> {
+pub fn get_element_childs_from_fs_aps(fs: Vec<Field>, aps: Vec<u32>, index: usize) -> Result<Vec<Field>, &'static str> {
     if index >= aps.len() {
         return Err("The index cannot be bigger than the size of APS vector");
     }

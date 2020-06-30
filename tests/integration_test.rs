@@ -4,7 +4,7 @@ mod tests {
     use esgi_arena_resolver_algorithms::graph::*;
     use esgi_arena_resolver_algorithms::chinese_rings::*;
     
-    fn testing_data() -> (Vec<Vec<i8>>, Vec<Field>, Vec<u8>) {
+    fn testing_data() -> (Vec<Vec<i8>>, Vec<Field>, Vec<u32>) {
         let matrix_example: Vec<Vec<i8>> = vec![
             vec![0, 1], 
             vec![0, 2]
@@ -70,12 +70,12 @@ mod tests {
             
         ];
 
-        let aps_example: Vec<u8> = vec![0, 2, 4, 6, 8];
+        let aps_example: Vec<u32> = vec![0, 2, 4, 6, 8];
 
         return (matrix_example, fs_example, aps_example);
     }
 
-    fn testing_data_heavy_matrix() -> (Vec<Vec<i8>>, Vec<Field>, Vec<u8>) {
+    fn testing_data_heavy_matrix() -> (Vec<Vec<i8>>, Vec<Field>, Vec<u32>) {
         let matrix_example: Vec<Vec<i8>> = vec![
             vec![2, 0, 0], 
             vec![-1, -1, 0],
@@ -267,12 +267,12 @@ mod tests {
             .collect();
 
 
-        let aps_example: Vec<u8> = vec![0, 2, 5, 7, 10, 14, 17, 19, 22, 24];
+        let aps_example: Vec<u32> = vec![0, 2, 5, 7, 10, 14, 17, 19, 22, 24];
 
         return (matrix_example, fs_example, aps_example);
     }
 
-    fn testing_data_heavy_matrix_multi_end() -> (Vec<Vec<i8>>, Vec<Field>, Vec<u8>) {
+    fn testing_data_heavy_matrix_multi_end() -> (Vec<Vec<i8>>, Vec<Field>, Vec<u32>) {
         let matrix_example: Vec<Vec<i8>> = vec![
             vec![2, 0, 0], 
             vec![-1, -1, 0],
@@ -464,14 +464,14 @@ mod tests {
             .collect();
 
 
-        let aps_example: Vec<u8> = vec![0, 2, 5, 7, 10, 14, 17, 19, 22, 24];
+        let aps_example: Vec<u32> = vec![0, 2, 5, 7, 10, 14, 17, 19, 22, 24];
 
         return (matrix_example, fs_example, aps_example);
     }
 
     
 
-    fn testing_data_no_road() -> (Vec<Vec<i8>>, Vec<Field>, Vec<u8>) {
+    fn testing_data_no_road() -> (Vec<Vec<i8>>, Vec<Field>, Vec<u32>) {
         let matrix_example: Vec<Vec<i8>> = vec![
             vec![-1, 1], 
             vec![2, -1]
@@ -538,7 +538,7 @@ mod tests {
 
         ];
 
-        let aps_example: Vec<u8> = vec![0, 2, 4, 6, 8];
+        let aps_example: Vec<u32> = vec![0, 2, 4, 6, 8];
 
         return (matrix_example, fs_example, aps_example);
     }
