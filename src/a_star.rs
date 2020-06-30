@@ -85,7 +85,7 @@ pub fn get_manhattan_distance_heuristic(start_coordinates: Point, end_coordinate
     return (x.abs() + y.abs()) as u8;
 }
 
-pub fn a_star_multi_roads_resolver(fs: &mut Vec<Field>, aps: Vec<u8>, matrix_size: usize, start_end_point: (Field, Vec<Field>)) -> Result<Vec<Vec<Point>>, &'static str> {
+pub fn a_star_multi_roads_resolver(fs: &mut Vec<Field>, aps: Vec<u32>, matrix_size: usize, start_end_point: (Field, Vec<Field>)) -> Result<Vec<Vec<Point>>, &'static str> {
     if fs.is_empty() || aps.is_empty() || matrix_size == 0 || start_end_point == (Field::new(), Vec::new()) {
         return Err("The parameters MUST be initializes");
     }
@@ -176,7 +176,7 @@ pub fn a_star_multi_roads_resolver(fs: &mut Vec<Field>, aps: Vec<u8>, matrix_siz
 /// }
 /// ];
 
-/// let aps_example: Vec<u8> = vec![0, 2, 4, 6, 8];
+/// let aps_example: Vec<u32> = vec![0, 2, 4, 6, 8];
 /// let start_end_fields = (Field {
 ///     coordinates: Point {
 ///         x: Some(0),
@@ -204,7 +204,7 @@ pub fn a_star_multi_roads_resolver(fs: &mut Vec<Field>, aps: Vec<u8>, matrix_siz
 ///     }
 /// ]);
 /// ```
-pub fn a_star_resolver(fs: Vec<Field>, aps: Vec<u8>, matrix_size: usize, start_end_point: (Field, Field)) -> Result<Vec<Point>, &'static str> {
+pub fn a_star_resolver(fs: Vec<Field>, aps: Vec<u32>, matrix_size: usize, start_end_point: (Field, Field)) -> Result<Vec<Point>, &'static str> {
     if fs.is_empty() || aps.is_empty() || start_end_point == (Field::new(), Field::new()) {
         return Err("The parameters MUST be initializes");
     }
