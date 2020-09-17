@@ -1,33 +1,114 @@
-name: Rust
+name: CI
 
 on:
   push:
-    branches: 
-      - master
-      - development
+    paths-ignore:
+      - "**.md"
+      - "**.py"
+    branches-ignore:
+      - "try/**"
   pull_request:
-    branches: 
-      - master
-      - development
+    paths-ignore:
+      - "**.md"
+      - "**.py"
 
 jobs:
-  build:
 
+  check:
+    name: Check build
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v2
-  
-    - name: Install dependencies
-      run: cargo install cargo-tarpaulin
-    
-    - name: Build
-      run: cargo build
+      - uses: actions/checkout@v2
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: build-${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+      - name: Run build check
+        uses: actions-rs/cargo@v1
+        with:
+          command: check
+          args: --all-features
 
-    - name: Test with coverage
-      run: cargo tarpaulin --out Lcov --output-dir ./coverage
+  clippy:
+    name: Clippy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: build-${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+      - name: Run cargo clippy
+        uses: actions-rs/clippy-check@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          args: --all-features -- -D warnings
 
-    - name: Coveralls
-      uses: coverallsapp/github-action@master
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
+
+  format:
+    name: Rustfmt
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+          components: rustfmt
+      - name: Run cargo fmt
+        uses: actions-rs/cargo@v1
+        with:
+          command: fmt
+          args: --all -- --check
+
+  tests:
+    name: Tests
+    needs: check
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        rust: [stable, nightly]
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/cache@v2
+        if: matrix.os != 'macos-latest'
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: build-${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: ${{ matrix.rust }}
+          override: true
+      - name: Build tests
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --tests
+      - name: Run tests
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+
